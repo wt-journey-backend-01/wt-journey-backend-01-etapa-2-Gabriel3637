@@ -1,258 +1,282 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 9 créditos restantes para usar o sistema de feedback AI.
+Você tem 8 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para Gabriel3637:
 
-Nota final: **20.8/100**
+Nota final: **23.8/100**
 
-# Feedback do seu Desafio API REST para o Departamento de Polícia 🚓💻
+# Feedback para Gabriel3637 🚓✨
 
-Olá, Gabriel3637! Tudo bem? 😊 Primeiro, quero parabenizar você pelo esforço em construir essa API com Node.js e Express. Já vi que você estruturou seu código com controllers e repositories, e isso é um ótimo começo para uma arquitetura organizada! 👏
+Olá, Gabriel! Primeiro, parabéns por ter se dedicado a este desafio complexo de construir uma API RESTful para o Departamento de Polícia! 🎉 Eu vi que você organizou seu projeto com a estrutura de pastas correta, dividindo bem as responsabilidades entre **routes**, **controllers**, **repositories** e **utils**. Isso já é um ótimo sinal de que você está caminhando para um código modular e organizado! 👏
+
+Além disso, você implementou os endpoints para os recursos `/agentes` e `/casos` e já tem validações e tratamento de erros, o que mostra um esforço legal para entregar uma API robusta. Também percebi que você usou o pacote `uuid` para gerar IDs, o que é uma boa prática para garantir unicidade.
+
+Agora, vamos juntos analisar alguns pontos que podem ser melhorados para deixar sua API tinindo! 🕵️‍♂️🔍
 
 ---
 
-## 🎉 O que você mandou bem
+## 1. Organização das Rotas — Atenção ao caminho das rotas!
 
-- Seus controllers para **agentes** e **casos** estão bem estruturados, com funções claras para cada operação (GET, POST, PUT, PATCH, DELETE). Por exemplo, no `agentesController.js` você já faz validações e retorna status codes apropriados, como:
+No arquivo **routes/agentesRoutes.js**, você declarou as rotas assim:
 
 ```js
-if(!agenteEncontrado){
-    return res.status(404).json({
-        "status": 404,
-        "message": "Agente não encontrado",
-        "errors": [
-            {"id": "Não existe agente com esse id"}
-        ]
-    })
+routerAgente.get('/agentes', agentesController.getAllAgentes);
+routerAgente.get('/agentes/:id', agentesController.getAgente);
+routerAgente.post('/agentes', agentesController.postAgente);
+routerAgente.put('/agentes/:id', agentesController.putAgente);
+routerAgente.patch('/agentes/:id', agentesController.patchAgente);
+routerAgente.delete('/agentes/:id', agentesController.deleteAgente);
+```
+
+Mas no seu **server.js** você já está usando o prefixo `/agentes` para o router:
+
+```js
+app.use("/agentes", agentesRouter);
+```
+
+Isso significa que as rotas dentro do `agentesRouter` **não precisam repetir** o prefixo `/agentes` — elas devem ser relativas à raiz do router. Ou seja, o correto seria:
+
+```js
+routerAgente.get('/', agentesController.getAllAgentes);
+routerAgente.get('/:id', agentesController.getAgente);
+routerAgente.post('/', agentesController.postAgente);
+routerAgente.put('/:id', agentesController.putAgente);
+routerAgente.patch('/:id', agentesController.patchAgente);
+routerAgente.delete('/:id', agentesController.deleteAgente);
+```
+
+O mesmo vale para o arquivo **routes/casosRoutes.js**, que está correto nesse ponto, pois as rotas são relativas a `/casos`:
+
+```js
+routerCaso.get('/', casosController.getAllCasos);
+// ...
+```
+
+**Por que isso importa?**  
+Se você mantém o prefixo `/agentes` dentro das rotas e também no `app.use`, suas URLs ficam duplicadas, como `/agentes/agentes`, e isso faz com que as requisições não encontrem os endpoints corretos. Isso pode explicar porque suas requisições para `/agentes` estão falhando.
+
+---
+
+## 2. Validação dos IDs — IDs precisam ser UUIDs válidos!
+
+Você recebeu uma penalidade importante porque o ID usado para agentes e casos não está validando se é um UUID válido. No seu código, por exemplo, no `agentesController.js`:
+
+```js
+let erro = tratadorErro.errorAgenteId(idAgente);
+```
+
+E no `errorHandler.js` (que não foi enviado, mas imagino que faça a validação), é importante que essa função verifique se o ID tem o formato UUID válido antes de prosseguir.
+
+Além disso, no seu `agentesRepository.js`, percebi que ao atualizar um agente, você permite que o ID seja alterado:
+
+```js
+function atualizarAgente(id, novoId, nome, data, cargo){
+    let i = agentes.findIndex((item) => item.id == id);
+    if(i > -1){
+        agentes[i].id = novoId; // <-- aqui permite trocar o ID!
+        // ...
+    }
 }
 ```
 
-- O uso de um módulo de tratamento de erros (`errorHandler.js`) para validar IDs e parâmetros é uma boa prática para manter seu código limpo e organizado.
+**Por que isso é problemático?**  
+O ID deve ser imutável, pois é a chave única do recurso. Permitir que ele seja alterado pode causar inconsistências e confundir o sistema. O ideal é que o ID seja gerado uma vez no momento da criação e nunca mais alterado.
 
-- Você também implementou filtros e ordenação no `agentesRepository.js` e `casosRepository.js`, o que é um diferencial bacana, mesmo que ainda precise de ajustes.
-
-- Parabéns por ter passado algumas validações de payload incorreto, garantindo que sua API responda com status 400 em casos de dados mal formatados.
-
----
-
-## 🕵️‍♂️ Pontos que precisam de atenção para destravar tudo
-
-### 1. **Falta dos arquivos de rotas (`routes/agentesRouter.js` e `routes/casosRouter.js`)**
-
-O problema mais fundamental que encontrei foi a ausência dos arquivos de rotas para os recursos `/agentes` e `/casos`. No seu `server.js`, você importa esses arquivos:
-
-```js
-const agentesRouter = require("./routes/agentesRouter");
-const casosRouter = require("./routes/casosRouter");
-```
-
-Mas ao analisar seu repositório, esses arquivos **não existem**! Isso significa que as rotas que deveriam chamar os controllers não estão definidas, e portanto, nenhum endpoint está realmente ativo para receber as requisições HTTP.
-
-⚠️ **Esse é o principal motivo pelo qual várias funcionalidades não funcionam, pois sem as rotas, o Express não sabe quais URLs responder.**
-
-**Como corrigir:**
-
-Você precisa criar os arquivos `routes/agentesRouter.js` e `routes/casosRouter.js` e definir as rotas usando o `express.Router()`. Por exemplo, para agentes:
-
-```js
-const express = require('express');
-const router = express.Router();
-const agentesController = require('../controllers/agentesController');
-
-router.get('/agentes', agentesController.getAllAgentes);
-router.get('/agentes/:id', agentesController.getAgente);
-router.post('/agentes', agentesController.postAgente);
-router.put('/agentes/:id', agentesController.putAgente);
-router.patch('/agentes/:id', agentesController.patchAgente);
-router.delete('/agentes/:id', agentesController.deleteAgente);
-
-module.exports = router;
-```
-
-E algo semelhante para os casos.
-
-**Recurso recomendado:**  
-- Para entender melhor como criar e organizar rotas, veja a documentação oficial do Express:  
-  https://expressjs.com/pt-br/guide/routing.html  
-- Também recomendo este vídeo para entender a arquitetura MVC e organização das rotas:  
-  https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH
+**Sugestão:**  
+- Não permita que o ID seja alterado em `put` ou `patch`.  
+- No seu controller, ignore o campo `id` do corpo da requisição para atualização.  
+- Na função `atualizarAgente` e similares, remova o parâmetro `novoId` e não altere o `id` do objeto.
 
 ---
 
-### 2. **Estrutura de diretórios e nomenclatura dos arquivos**
+## 3. Filtros e Ordenação no Endpoint de Casos — Ajuste os nomes dos filtros!
 
-Percebi que na sua estrutura você nomeou os arquivos de rotas como `agentesRouter.js` e `casosRouter.js`, mas o esperado no desafio é que sejam chamados `agentesRoutes.js` e `casosRoutes.js` (com "Routes" no plural).
-
-Além disso, no seu `server.js` você importa assim:
+No seu `casosController.js`, você está recebendo os filtros assim:
 
 ```js
-const agentesRouter = require("./routes/agentesRouter");
-const casosRouter = require("./routes/casosRouter");
-```
-
-Porém, o padrão esperado é:
-
-```js
-const agentesRoutes = require("./routes/agentesRoutes");
-const casosRoutes = require("./routes/casosRoutes");
-```
-
-Esse detalhe é importante para manter a padronização e evitar confusão na hora de rodar o projeto.
-
-**Recurso recomendado:**  
-- Para entender melhor a arquitetura MVC e a importância de organizar seus arquivos conforme padrões, assista:  
-  https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH
-
----
-
-### 3. **Filtros no repositório de casos estão incorretos**
-
-No arquivo `repositories/casosRepository.js`, seu método `findAll` tenta aplicar filtros, mas está comparando sempre `item.id` com os valores dos filtros errados, por exemplo:
-
-```js
-if(filtro.colunaTitulo){
-    casosCopia = casosCopia.filter((item) => item.id == filtro.colunaTitulo)
+const {id, nome, dataDeIncorporacao, cargo} = req.query;
+let filtro = {
+    colunaId: id,
+    colunaNome: nome,
+    colunaDataDeIncorporacao: dataDeIncorporacao,
+    colunaCargo: cargo
 }
 ```
 
-Aqui, você está filtrando pelo `id` quando deveria filtrar pela propriedade correta, como `titulo`, `descricao`, `status` ou `agente_id`.
-
-Por exemplo, o correto seria:
+Mas os campos de um caso são diferentes! Um caso tem `titulo`, `descricao`, `status`, e `agente_id`. No seu `casosRepository.js` você filtra por:
 
 ```js
 if(filtro.colunaTitulo){
     casosCopia = casosCopia.filter((item) => item.titulo == filtro.colunaTitulo)
 }
-```
-
-Esse erro faz com que seus filtros para casos não funcionem, prejudicando a busca e ordenação.
-
-**Recurso recomendado:**  
-- Para entender melhor como manipular arrays e usar `filter`, confira:  
-  https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI
-
----
-
-### 4. **Validação de IDs com UUID**
-
-Foi detectado que os IDs usados para agentes e casos não seguem o formato UUID, que é um requisito importante para garantir unicidade e padronização.
-
-No seu repositório, os IDs parecem strings aleatórias, mas para garantir que são UUIDs válidos, você pode usar a biblioteca `uuid` para gerar e validar IDs.
-
-No seu `package.json` você tem a dependência `uuid` instalada, mas não vi seu uso para gerar IDs novos.
-
-**Dica:** Sempre que criar um novo agente ou caso, gere o ID com `uuid.v4()` para garantir que está correto.
-
-Exemplo:
-
-```js
-const { v4: uuidv4 } = require('uuid');
-
-function criarAgente(nome, data, cargo){
-    const id = uuidv4();
-    // resto da criação
+if(filtro.colunaDescricao){
+    casosCopia = casosCopia.filter((item) => item.descricao == filtro.colunaDescricao)
+}
+if(filtro.colunaStatus){
+    casosCopia = casosCopia.filter((item) => item.status == filtro.colunaStatus)
+}
+if(filtro.colunaAgenteId){
+    casosCopia = casosCopia.filter((item) => item.agente_id == filtro.colunaAgenteId)
 }
 ```
 
-**Recurso recomendado:**  
-- Para entender UUID e sua utilização, veja:  
-  https://expressjs.com/pt-br/guide/routing.html (ajuda a entender middlewares e libs externas)  
-- E documentação do `uuid`:  
-  https://www.npmjs.com/package/uuid
+Porém, no controller, você não está preenchendo o filtro com essas propriedades. Isso significa que ao chamar `/casos?status=aberto`, seu filtro não vai funcionar porque `filtro.colunaStatus` está `undefined`.
+
+**Como corrigir?**  
+No `casosController.js`, ajuste para extrair os parâmetros corretos do query:
+
+```js
+const { id, titulo, descricao, status, agente_id } = req.query;
+let filtro = {
+    colunaId: id,
+    colunaTitulo: titulo,
+    colunaDescricao: descricao,
+    colunaStatus: status,
+    colunaAgenteId: agente_id
+};
+```
+
+Assim, o filtro será aplicado corretamente.
 
 ---
 
-### 5. **Resposta no DELETE com status 204 e corpo JSON**
+## 4. Validação do Agente na Criação e Atualização de Casos — Verifique se o agente existe!
 
-Nos seus controllers para DELETE, você retorna status 204 com um corpo JSON, por exemplo:
+No seu `casosController.js`, no método `postCaso`, você chama:
 
 ```js
-return res.status(204).json({
-    "status": 204,
-    "message": "Agente removido com sucesso"
-});
+casosRepository.criarCaso(corpoCaso.titulo, corpoCaso.descricao, corpoCaso.status, corpoCaso.agente_id);
 ```
 
-O status 204 indica "No Content", ou seja, a resposta não deve conter corpo. Enviar JSON junto com 204 pode gerar problemas.
+Mas não vi nenhuma validação para garantir que o `agente_id` informado realmente existe no repositório de agentes.
 
-**Como corrigir:**  
-Use apenas:
+**Por que isso é importante?**  
+Um caso não pode ser criado para um agente que não existe. Isso gera inconsistências e erros na API.
+
+**Como melhorar?**  
+Antes de criar o caso, faça uma verificação:
+
+```js
+const agentesRepository = require("../repositories/agentesRepository");
+
+function postCaso(req, res){
+    const corpoCaso = req.body;
+    let erro = tratadorErro.errorCasoParametros(corpoCaso);
+    if(erro){
+        return res.status(erro.status).json(erro);
+    }
+    
+    const agenteExiste = agentesRepository.findId(corpoCaso.agente_id);
+    if(!agenteExiste){
+        return res.status(404).json({
+            status: 404,
+            message: "Agente não encontrado para o agente_id informado",
+            errors: [{ agente_id: "Não existe agente com esse id" }]
+        });
+    }
+
+    casosRepository.criarCaso(corpoCaso.titulo, corpoCaso.descricao, corpoCaso.status, corpoCaso.agente_id);
+
+    return res.status(201).json({
+        status: 201,
+        message: "Caso criado com sucesso"
+    });
+}
+```
+
+Faça a mesma validação para os métodos `putCaso` e `patchCaso` que atualizam o agente de um caso.
+
+---
+
+## 5. Respostas HTTP e Status Codes — Ajuste o retorno nos deletes
+
+No seu `agentesController.js` e `casosController.js`, nos métodos de delete você faz:
 
 ```js
 return res.status(204).send();
 ```
 
-Ou, se quiser enviar mensagem, retorne status 200 ou 202.
+Isso está correto, pois o status 204 indica que o recurso foi deletado e não há conteúdo para retornar.
 
-**Recurso recomendado:**  
-- Para entender melhor os status HTTP, veja:  
-  https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/204  
-- E este vídeo explicando status codes no Express:  
+Porém, antes disso, você deveria garantir que o recurso foi realmente removido. No seu repositório, as funções de remoção retornam `true` ou `false`, mas no controller você não está verificando esse retorno.
+
+**Sugestão:**  
+Verifique o retorno da remoção para garantir que o recurso foi deletado e, se não, retorne um erro 500 ou semelhante.
+
+---
+
+## 6. Pequeno detalhe na remoção por índice no repositório
+
+No seu `agentesRepository.js`, a função `removerAgenteIndex` tem essa condição:
+
+```js
+if(i < agentes.length && i == 0){
+    agentes.splice(i, 1);
+    resp = true;
+}
+```
+
+Aqui, o `i == 0` faz com que só remova se o índice for zero, o que provavelmente não é o esperado. Você quer remover pelo índice se ele estiver dentro do intervalo válido (0 a length-1).
+
+**Corrija para:**
+
+```js
+if(i >= 0 && i < agentes.length){
+    agentes.splice(i, 1);
+    resp = true;
+}
+```
+
+O mesmo vale para `removerCasoIndex` em `casosRepository.js`.
+
+---
+
+## 7. Parabéns pelos bônus que você conseguiu!
+
+🎉 Você já implementou:
+
+- Filtragem simples por status de casos.  
+- Busca do agente responsável por um caso.  
+- Filtragem de agentes por data de incorporação com ordenação crescente e decrescente.  
+- Mensagens de erro customizadas para IDs inválidos.  
+
+Esses são diferenciais que mostram seu esforço em ir além do básico, e isso é muito legal! Continue nessa pegada! 🚀
+
+---
+
+## Recursos que recomendo para você mergulhar mais fundo:
+
+- Para organizar rotas e entender o uso correto do `express.Router()`:  
+  https://expressjs.com/pt-br/guide/routing.html
+
+- Para entender melhor o fluxo de requisição e resposta, status codes e métodos HTTP:  
   https://youtu.be/RSZHvQomeKE
 
----
+- Para aprender como validar UUIDs e garantir integridade dos dados:  
+  https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400
 
-### 6. **No seu `server.js` a ordem dos middlewares**
-
-Você fez:
-
-```js
-app.use(express.json());
-app.use(casosRouter);
-app.use(agentesRouter);
-```
-
-Isso está correto, mas lembre-se que os routers precisam estar configurados para usar os prefixes corretos, como:
-
-```js
-app.use('/casos', casosRoutes);
-app.use('/agentes', agentesRoutes);
-```
-
-Sem isso, todas as rotas estarão no nível raiz, o que pode causar conflitos.
+- Para manipular filtros e ordenações corretamente em arrays:  
+  https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI
 
 ---
 
-## ✨ Dicas gerais para você continuar evoluindo
+## 📝 Resumo rápido do que focar para avançar:
 
-- Organize seu projeto conforme a estrutura esperada, com arquivos de rotas separados, controllers e repositories bem definidos.
-- Sempre valide seus dados com cuidado, e use UUID para IDs.
-- Teste seus endpoints com ferramentas como Postman ou Insomnia para garantir que tudo está funcionando.
-- Estude a documentação oficial do Express para entender melhor roteamento e middlewares.
-- Continue praticando manipulação de arrays para filtros e ordenação.
-
----
-
-## 📋 Resumo rápido dos principais pontos para focar:
-
-- [ ] Criar os arquivos `routes/agentesRoutes.js` e `routes/casosRoutes.js` com as rotas corretamente definidas usando `express.Router()`.
-- [ ] Corrigir os filtros no `casosRepository.js` para comparar as propriedades corretas (ex: `titulo` ao invés de `id`).
-- [ ] Ajustar a nomenclatura dos arquivos para seguir o padrão esperado (`agentesRoutes.js` e `casosRoutes.js`).
-- [ ] Garantir que os IDs usados sejam UUIDs válidos, usando a biblioteca `uuid` para gerar novos IDs.
-- [ ] Corrigir o retorno do DELETE para não enviar corpo JSON junto com status 204.
-- [ ] Ajustar o `server.js` para usar os prefixes de rota (`app.use('/agentes', agentesRoutes)`).
-- [ ] Rever a arquitetura do projeto para garantir que está modularizada e organizada conforme esperado.
+- Ajuste as rotas em `agentesRoutes.js` para não repetir o prefixo `/agentes`.  
+- Garanta que os IDs usados sejam UUIDs válidos e **não permitam alteração do ID** em atualizações.  
+- Corrija os filtros no controller de casos para usar os nomes corretos dos campos.  
+- Implemente validação para verificar se o `agente_id` existe antes de criar ou atualizar um caso.  
+- Revise as funções de remoção por índice para aceitar qualquer índice válido, não só zero.  
+- Continue aprimorando as mensagens de erro para serem claras e úteis para o usuário da API.
 
 ---
 
-Gabriel, você está no caminho certo! 🚀 Não desanime com as dificuldades, pois entender e aplicar essas correções vai fazer sua API funcionar com qualidade e profissionalismo. Estou aqui torcendo para ver sua evolução! 💪
+Gabriel, você está no caminho certo e com ajustes focados você vai destravar sua API rapidinho! 🚀 Não desanime com as dificuldades, elas são degraus para o aprendizado. Se precisar, volte aos vídeos indicados para reforçar os conceitos, e continue praticando.
 
-Se quiser, posso ajudar você a montar os arquivos de rota ou revisar qualquer outra parte do seu código, é só chamar! 😉
+Estou torcendo pelo seu sucesso! Qualquer dúvida, é só chamar! 🤜🤛
 
----
-
-## Recursos para você estudar e aprofundar:
-
-- [Express Routing - Documentação Oficial](https://expressjs.com/pt-br/guide/routing.html)  
-- [Arquitetura MVC em Node.js](https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH)  
-- [Manipulação de Arrays no JavaScript](https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI)  
-- [Status HTTP 204 - MDN](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/204)  
-- [Validação e criação de UUIDs com a biblioteca uuid](https://www.npmjs.com/package/uuid)  
-
----
-
-Continue firme, você está construindo uma base muito sólida! 🚀✨ Até a próxima revisão, amigo(a)! 👋😄
+Um abraço de Code Buddy! 🤖💙
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
