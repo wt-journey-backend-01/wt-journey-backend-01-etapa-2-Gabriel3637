@@ -35,24 +35,6 @@ function errorCasoParametros(corpoCaso){
     }
     arrayErro = [];
     
-    if(!corpoCaso.id){
-        arrayErro.push({
-            "id": "A requisição deve possuir o campo 'id'"
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    } else {
-        let idCaso = corpoCaso.id;
-
-        if(!validate(idCaso)){
-            arrayErro.push({
-                "id": "Formatação de id inválida"
-            })
-            erro.errors = arrayErro;
-            resp = erro
-        }
-    }
-    
     if(!corpoCaso.titulo){
         arrayErro.push({
             "titulo": "A requisição deve possuir o campo 'titulo'"
@@ -108,14 +90,6 @@ function errorCasoParametrosParciais(corpoCaso){
     }
 
     let arrayErro = [];
-
-    if(corpoCaso.id && !validate(corpoCaso.id)){
-        arrayErro.push({
-            "id": "Formatação de id inválida"
-        })
-        erro.errors = arrayErro;
-        resp = erro
-    }
 
     if(corpoCaso.status && (corpoCaso.status != "aberto" && corpoCaso.status != "solucionado")){
         arrayErro.push({
@@ -173,24 +147,6 @@ function errorAgenteParametros(corpoAgente){
     }
     arrayErro = [];
     
-    if(!corpoAgente.id){
-        arrayErro.push({
-            "id": "A requisição deve possuir o campo 'id'"
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    } else {
-        let idAgente = corpoAgente.id;
-
-        if(!validate(idAgente)){
-            arrayErro.push({
-                "id": "Formatação de id inválida"
-            })
-            erro.errors = arrayErro;
-            resp = erro
-        }
-    }
-    
     if(!corpoAgente.nome){
         arrayErro.push({
             "nome": "A requisição deve possuir o campo 'nome'"
@@ -235,14 +191,6 @@ function errorAgenteParametrosParciais(corpoAgente){
     }
 
     let arrayErro = [];
-
-    if(corpoAgente.id && !validate(corpoAgente.id)){
-        arrayErro.push({
-            "id": "Formatação de id inválida"
-        })
-        erro.errors = arrayErro;
-        resp = erro
-    }
 
     if(corpoAgente.dataDeIncorporacao && !isValidDate(corpoAgente.dataDeIncorporacao)){
         arrayErro.push({

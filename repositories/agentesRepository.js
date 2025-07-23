@@ -324,18 +324,17 @@ function removerAgenteId(id){
 
 function removerAgenteIndex(i){
     let resp = false;
-    if(i < agentes.length && i == 0){
+    if(i < agentes.length && i < agentes.length){
         agentes.splice(i, 1);
         resp = true;
     }
     return resp;
 }
 
-function atualizarAgente(id, novoId, nome, data, cargo){
+function atualizarAgente(id, nome, data, cargo){
     let resp = false;
     let i = agentes.findIndex((item) => item.id == id);
     if(i > -1){
-        agentes[i].id = novoId;
         agentes[i].nome = nome;
         agentes[i].dataDeIncorporacao = data;
         agentes[i].cargo = cargo;
@@ -345,13 +344,10 @@ function atualizarAgente(id, novoId, nome, data, cargo){
     return resp;
 }
 
-function atualizarParcialAgente(id, novoId = null, nome = null, data = null, cargo = null){
+function atualizarParcialAgente(id, nome = null, data = null, cargo = null){
     let resp = false;
     let i = agentes.findIndex((item) => item.id == id);
     if(i > -1){
-        if(novoId){
-            agentes[i].id = novoId;
-        }
         if(nome){
             agentes[i].nome = nome;
         }

@@ -50,12 +50,15 @@ function postAgente(req, res){
         return res.status(erro.status).json(erro);
     }
     
-    agentesRepository.criarAgente(corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
-
-    return res.status(201).json({
-        "status": 201,
-        "message": "Agente criado com sucesso"
-    });
+    let validar = agentesRepository.criarAgente(corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
+    if(validar){
+        return res.status(201).json({
+            "status": 201,
+            "message": "Agente criado com sucesso"
+        });
+    } else {
+        return res.status(500).send();
+    }
 }
 
 function putAgente(req, res){
@@ -80,12 +83,16 @@ function putAgente(req, res){
         return res.status(erro.status).json(erro);
     }
 
-    agentesRepository.atualizarAgente(idAgente, corpoAgente.id, corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
+    let validar = agentesRepository.atualizarAgente(idAgente, corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
 
-    return res.status(200).json({
-        "status": 200,
-        "message": "Atualização realizada com sucesso"
-    });
+    if(validar){
+        return res.status(200).json({
+            "status": 200,
+            "message": "Atualização realizada com sucesso"
+        });
+    } else {
+        return res.status(500).send()
+    }
 }
 
 function patchAgente(req, res){
@@ -97,12 +104,16 @@ function patchAgente(req, res){
         return res.status(erro.status).json(erro)
     }
 
-    agentesRepository.atualizarParcialAgente(idAgente,corpoAgente.id, corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
+    let validar = agentesRepository.atualizarParcialAgente(idAgente, corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
 
-    return res.status(200).json({
-        "status": 200,
-        "message": "Atualização parcial realizada com sucesso"
-    })
+    if(validar){
+        return res.status(200).json({
+            "status": 200,
+            "message": "Atualização parcial realizada com sucesso"
+        })
+    }else {
+        return res.status(500).send()
+    }
 }
 
 function deleteAgente(req, res){
@@ -124,8 +135,13 @@ function deleteAgente(req, res){
         })
     }
 
-    agentesRepository.removerAgenteId(agenteId);
-    return res.status(204).send();
+    
+    let validar = agentesRepository.removerAgenteId(agenteId);
+    if(validar){
+        return res.status(204).send();
+    } else {
+        return res.status(500).send()
+    }
 }
 
 
