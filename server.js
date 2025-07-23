@@ -1,12 +1,12 @@
 const express = require('express')
-const agentesRouter = require("./routes/agentesRouter");
-const casosRouter = require("./routes/casosRouter");
+const agentesRouter = require("./routes/agentesRoutes.js");
+const casosRouter = require("./routes/casosRoutes.js");
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
-app.use(casosRouter);
-app.use(agentesRouter);
+app.use("/casos", casosRouter);
+app.use("/agentes", agentesRouter);
 
 
 

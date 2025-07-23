@@ -1,9 +1,8 @@
 const casosRepository = require("../repositories/casosRepository");
 
-function isValidUUID(str) {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(str);
-}
+const {validate} = require("uuid");
+
+
 
 function errorCasoId(idCaso){
     if(!idCaso){
@@ -15,7 +14,7 @@ function errorCasoId(idCaso){
             ]
         }
     }
-    if(!isValidUUID(idCaso)){
+    if(!validate(idCaso)){
         return {
             "status": 400,
             "message": "Id inválido",
@@ -45,7 +44,7 @@ function errorCasoParametros(corpoCaso){
     } else {
         let idCaso = corpoCaso.id;
 
-        if(!isValidUUID(idCaso)){
+        if(!validate(idCaso)){
             arrayErro.push({
                 "id": "Formatação de id inválida"
             })
@@ -87,7 +86,7 @@ function errorCasoParametros(corpoCaso){
     if(!corpoCaso.agente_id){
         corpoCaso.agente_id = null;
     }else{
-        if(!isValidUUID(corpoCaso.agente_id)){
+        if(!validate(corpoCaso.agente_id)){
             arrayErro.push({
                 "agente_id": "Formatação de agente_id inválida"
             })
@@ -110,7 +109,7 @@ function errorCasoParametrosParciais(corpoCaso){
 
     let arrayErro = [];
 
-    if(corpoCaso.id && !isValidUUID(corpoCaso.id)){
+    if(corpoCaso.id && !validate(corpoCaso.id)){
         arrayErro.push({
             "id": "Formatação de id inválida"
         })
@@ -140,7 +139,7 @@ function errorAgenteId(idAgente){
             ]
         }
     }
-    if(!isValidUUID(idAgente)){
+    if(!validate(idAgente)){
         return {
             "status": 400,
             "message": "Id inválido",
@@ -183,7 +182,7 @@ function errorAgenteParametros(corpoAgente){
     } else {
         let idAgente = corpoAgente.id;
 
-        if(!isValidUUID(idAgente)){
+        if(!validate(idAgente)){
             arrayErro.push({
                 "id": "Formatação de id inválida"
             })
@@ -237,7 +236,7 @@ function errorAgenteParametrosParciais(corpoAgente){
 
     let arrayErro = [];
 
-    if(corpoAgente.id && !isValidUUID(corpoAgente.id)){
+    if(corpoAgente.id && !validate(corpoAgente.id)){
         arrayErro.push({
             "id": "Formatação de id inválida"
         })

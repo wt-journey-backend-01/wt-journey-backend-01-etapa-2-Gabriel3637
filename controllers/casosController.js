@@ -49,7 +49,7 @@ function postCaso(req, res){
         return res.status(erro.status).json(erro);
     }
     
-    casosRepository.criarCaso(corpoCaso.id, corpoCaso.titulo, corpoCaso.descricao, corpoCaso.status, corpoCaso.agente_id);
+    casosRepository.criarCaso(corpoCaso.titulo, corpoCaso.descricao, corpoCaso.status, corpoCaso.agente_id);
 
     return res.status(201).json({
         "status": 201,
@@ -124,11 +124,7 @@ function deleteCaso(req, res){
     }
 
     casosRepository.removerCasoId(casoId);
-    console.log("Teste");
-    return res.status(204).json({
-        "status": 204,
-        "message": "Caso removido com sucesso"
-    });
+    return res.status(204).send();
 }
 
 

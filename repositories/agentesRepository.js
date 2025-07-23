@@ -1,123 +1,124 @@
+const {v4: uuidv4} = require('uuid');
 const agentes = [
   {
-    "id": "401bccf5-cf9e-489d-8412-446cd169a0f1",
-    "nome": "Rommel Carneiro",
-    "dataDeIncorporacao": "1992/10/04",
-    "cargo": "delegado"
+    id: '4dcd8f2a-1a2f-4786-af0a-d7baee70f270',
+    nome: 'Rommel Carneiro',
+    dataDeIncorporacao: '1992/10/04',
+    cargo: 'delegado'
   },
   {
-    "id": "5e6d7f8a-9b0c-4c1e-a2b3-557de270b1f2",
-    "nome": "Ana Silva",
-    "dataDeIncorporacao": "2000/05/12",
-    "cargo": "investigador"
+    id: 'c93dea02-c8dd-4fa6-bba5-2bc2661dbff8',
+    nome: 'Ana Silva',
+    dataDeIncorporacao: '2000/05/12',
+    cargo: 'investigador'
   },
   {
-    "id": "6f8e9a0b-1c2d-4e3f-b4a5-668ef381c2f3",
-    "nome": "Rommel Carneiro",
-    "dataDeIncorporacao": "1995/03/22",
-    "cargo": "escrivao"
+    id: '4a2b567e-af28-4687-a375-c4e531c23303',
+    nome: 'Rommel Carneiro',
+    dataDeIncorporacao: '1995/03/22',
+    cargo: 'escrivao'
   },
   {
-    "id": "7a9f0b1c-2d3e-5f4a-c5b6-779f492d3e4f",
-    "nome": "Carlos Mendes",
-    "dataDeIncorporacao": "1992/10/04",
-    "cargo": "delegado"
+    id: '2bf83017-8e0d-43c5-b3b1-6ee98b4fdac2',
+    nome: 'Carlos Mendes',
+    dataDeIncorporacao: '1992/10/04',
+    cargo: 'delegado'
   },
   {
-    "id": "8b0c1d2e-3f4a-6b5c-d6e7-88a0504e4f5a",
-    "nome": "Beatriz Costa",
-    "dataDeIncorporacao": "2010/07/19",
-    "cargo": "investigador"
+    id: '1948520c-8cd5-4d4b-8600-a59c48453d16',
+    nome: 'Beatriz Costa',
+    dataDeIncorporacao: '2010/07/19',
+    cargo: 'investigador'
   },
   {
-    "id": "9c1d2e3f-4a5b-7c6d-e7f8-99b1615f5a6b",
-    "nome": "Rommel Carneiro",
-    "dataDeIncorporacao": "2005/11/30",
-    "cargo": "delegado"
+    id: '5d592c77-29c5-41f9-988b-0d7911050967',
+    nome: 'Rommel Carneiro',
+    dataDeIncorporacao: '2005/11/30',
+    cargo: 'delegado'
   },
   {
-    "id": "0d2e3f4a-5b6c-8d7e-f8a9-aac272605b7c",
-    "nome": "Juliana Pereira",
-    "dataDeIncorporacao": "1998/02/15",
-    "cargo": "escrivao"
+    id: 'f7a3ff65-5046-4ee1-8e39-c2057b2aec57',
+    nome: 'Juliana Pereira',
+    dataDeIncorporacao: '1998/02/15',
+    cargo: 'escrivao'
   },
   {
-    "id": "1e3f4a5b-6c7d-9e8f-a9b0-bbd383716c8d",
-    "nome": "Marcos Lima",
-    "dataDeIncorporacao": "2000/05/12",
-    "cargo": "investigador"
+    id: '553f2b26-331e-4302-97d8-fb5b9a95cba8',
+    nome: 'Marcos Lima',
+    dataDeIncorporacao: '2000/05/12',
+    cargo: 'investigador'
   },
   {
-    "id": "2f4a5b6c-7d8e-0a9f-b0c1-cce494827d9e",
-    "nome": "Ana Silva",
-    "dataDeIncorporacao": "2015/09/25",
-    "cargo": "delegado"
+    id: '0a2df2ca-d8a0-4aa3-a107-910d61711707',
+    nome: 'Ana Silva',
+    dataDeIncorporacao: '2015/09/25',
+    cargo: 'delegado'
   },
   {
-    "id": "3a5b6c7d-8e9f-1b0a-c1d2-ddf5a5938e0a",
-    "nome": "Pedro Almeida",
-    "dataDeIncorporacao": "1992/10/04",
-    "cargo": "escrivao"
+    id: '0da30720-9197-4c2c-acca-dab395840fb2',
+    nome: 'Pedro Almeida',
+    dataDeIncorporacao: '1992/10/04',
+    cargo: 'escrivao'
   },
   {
-    "id": "4b6c7d8e-9f0a-2c1b-d2e3-eea6b6a49f1b",
-    "nome": "Fernanda Oliveira",
-    "dataDeIncorporacao": "2003/04/10",
-    "cargo": "investigador"
+    id: 'd2fc4859-ded7-49d3-b261-be26990978e1',
+    nome: 'Fernanda Oliveira',
+    dataDeIncorporacao: '2003/04/10',
+    cargo: 'investigador'
   },
   {
-    "id": "5c7d8e9f-0a1b-3d2c-e3f4-ffb7c7b5a02c",
-    "nome": "Rommel Carneiro",
-    "dataDeIncorporacao": "2010/07/19",
-    "cargo": "escrivao"
+    id: 'a8d631fc-bb93-4ba4-b78f-f98de428441f',
+    nome: 'Rommel Carneiro',
+    dataDeIncorporacao: '2010/07/19',
+    cargo: 'escrivao'
   },
   {
-    "id": "6d8e9f0a-1b2c-4e3d-f4a5-00c8d8c6b13d",
-    "nome": "Lucas Souza",
-    "dataDeIncorporacao": "1995/03/22",
-    "cargo": "delegado"
+    id: 'f0ee7c1c-9a22-4464-a9cd-bb96ffe41293',
+    nome: 'Lucas Souza',
+    dataDeIncorporacao: '1995/03/22',
+    cargo: 'delegado'
   },
   {
-    "id": "7e9f0a1b-2c3d-5f4e-a5b6-11d9e9d7c24e",
-    "nome": "Ana Silva",
-    "dataDeIncorporacao": "2005/11/30",
-    "cargo": "investigador"
+    id: '8ecc5e86-ffe2-4ee0-9815-9913aea9b961',
+    nome: 'Ana Silva',
+    dataDeIncorporacao: '2005/11/30',
+    cargo: 'investigador'
   },
   {
-    "id": "8f0a1b2c-3d4e-6a5f-b6c7-22eafa08d35f",
-    "nome": "Mariana Rocha",
-    "dataDeIncorporacao": "2015/09/25",
-    "cargo": "escrivao"
+    id: '891a1eb4-f3ed-4605-b862-34c18319d9c9',
+    nome: 'Mariana Rocha',
+    dataDeIncorporacao: '2015/09/25',
+    cargo: 'escrivao'
   },
   {
-    "id": "9a1b2c3d-4e5f-7b6a-c7d8-33fb0b19e46a",
-    "nome": "Carlos Mendes",
-    "dataDeIncorporacao": "1998/02/15",
-    "cargo": "delegado"
+    id: '40261691-4e90-4f4c-b406-a34acb7e2a63',
+    nome: 'Carlos Mendes',
+    dataDeIncorporacao: '1998/02/15',
+    cargo: 'delegado'
   },
   {
-    "id": "0b2c3d4e-5f6a-8c7b-d8e9-44ac1c2af57b",
-    "nome": "Beatriz Costa",
-    "dataDeIncorporacao": "2003/04/10",
-    "cargo": "investigador"
+    id: '24ba6b19-6a6b-4f9e-90ab-445b169952b7',
+    nome: 'Beatriz Costa',
+    dataDeIncorporacao: '2003/04/10',
+    cargo: 'investigador'
   },
   {
-    "id": "1c3d4e5f-6a7b-9d8c-e9f0-55bd2d3ba68c",
-    "nome": "Rommel Carneiro",
-    "dataDeIncorporacao": "2000/05/12",
-    "cargo": "escrivao"
+    id: 'f44dacca-e958-4b5b-90fd-c535ff8c0bb8',
+    nome: 'Rommel Carneiro',
+    dataDeIncorporacao: '2000/05/12',
+    cargo: 'escrivao'
   },
   {
-    "id": "2d4e5f6a-7b8c-0e9d-f0a1-66ce3e4cb79d",
-    "nome": "Ana Silva",
-    "dataDeIncorporacao": "2010/07/19",
-    "cargo": "delegado"
+    id: 'cf0e5183-050e-46f0-af80-5f467c60919c',
+    nome: 'Ana Silva',
+    dataDeIncorporacao: '2010/07/19',
+    cargo: 'delegado'
   },
   {
-    "id": "3e5f6a7b-8c9d-1f0e-a1b2-77df4f5dc8ae",
-    "nome": "Paulo Santos",
-    "dataDeIncorporacao": "1992/10/04",
-    "cargo": "investigador"
+    id: 'e462dfbd-9142-454b-a834-80cd3168b759',
+    nome: 'Paulo Santos',
+    dataDeIncorporacao: '1992/10/04',
+    cargo: 'investigador'
   }
 ];
 
@@ -295,11 +296,11 @@ function findId(id){
     return resp;
 }
 
-function criarAgente(id, nome, data, cargo){
+function criarAgente(nome, data, cargo){
     let resp = false;
 
     let agenteadicionar = {
-        "id": id,
+        "id": uuidv4(),
         "nome": nome,
         "dataDeIncorporacao": data,
         "cargo": cargo

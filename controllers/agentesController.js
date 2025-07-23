@@ -50,7 +50,7 @@ function postAgente(req, res){
         return res.status(erro.status).json(erro);
     }
     
-    agentesRepository.criarAgente(corpoAgente.id, corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
+    agentesRepository.criarAgente(corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
 
     return res.status(201).json({
         "status": 201,
@@ -125,11 +125,7 @@ function deleteAgente(req, res){
     }
 
     agentesRepository.removerAgenteId(agenteId);
-    console.log("Teste");
-    return res.status(204).json({
-        "status": 204,
-        "message": "Agente removido com sucesso"
-    });
+    return res.status(204).send();
 }
 
 
