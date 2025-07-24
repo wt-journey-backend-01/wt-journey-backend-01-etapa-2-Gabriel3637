@@ -1,6 +1,30 @@
 const casosRepository = require("../repositories/casosRepository");
 const agentesRepository = require("../repositories/agentesRepository");
 const tratadorErro = require("../utils/errorHandler");
+const {validate: validate} = require("uuid");
+
+function errorCasoId(idCaso){
+    if(!idCaso){
+        return {
+            "status": 400,
+            "message": "Id inexistente",
+            "errors": [
+                {"id": "Id inexistente"}
+            ]
+        }
+    }
+    if(!validate(idCaso)){
+        return {
+            "status": 400,
+            "message": "Id inválido",
+            "errors": [
+                {"id": "Formato de id inválido"}
+            ]
+        }
+    }
+    return null;
+}
+
 
 function getAllCasos(req, res) {
     const ordenar = req.query.sort;
@@ -21,7 +45,7 @@ function getAllCasos(req, res) {
 function getCaso(req, res){
     let idCaso = req.params.id;
 
-    let erro = tratadorErro.errorCasoId(idCaso);
+    let erro = errorCasoId(idCaso);
 
     if(erro){
         return res.status(erro.status).json(erro)
@@ -82,7 +106,7 @@ function postCaso(req, res){
 function putCaso(req, res){
     let corpoCaso = req.body;
     let idCaso = req.params.id;
-    let erro = tratadorErro.errorCasoId(idCaso);
+    let erro = errorCasoId(idCaso);
     if(erro){
         return res.status(erro.status).json(erro);
     }
@@ -190,7 +214,7 @@ function patchCaso(req, res){
 
 function deleteCaso(req, res){
     let casoId = req.params.id;
-    let erro = tratadorErro.errorCasoId(casoId);
+    let erro = errorCasoId(casoId);
     if(erro){
         return res.status(erro.status).json(erro);
     }
@@ -217,8 +241,15 @@ function deleteCaso(req, res){
 
 function getAgenteCaso(req, res){
     let idCaso = req.params.caso_id;
-    console.log(idCaso);
+
+    let erro = errorCasoId(idCaso);
+
+    if(erro){
+        return res.status(erro.status).json(erro);
+    }
+
     let casoEncontrado = casosRepository.findId(idCaso);
+
     if(!casoEncontrado){
         return res.status(404).json({
             "status": 404,
@@ -229,7 +260,14 @@ function getAgenteCaso(req, res){
         })
     }
 
-
+    let idAgenteResponsavel = casoEncontrado.agente_id;
+    if(!idAgenteResponsavel){
+         return res.status(404).json({
+            status: 404,
+            message: "Caso não possui agente responsável",
+            errors: [{ agente_id: "Caso não possui agente associado" }]
+        });
+    }
 
     let agenteEncontrado = agentesRepository.findId(casoEncontrado.agente_id);
 

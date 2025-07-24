@@ -4,27 +4,7 @@ const {validate} = require("uuid");
 
 
 
-function errorCasoId(idCaso){
-    if(!idCaso){
-        return {
-            "status": 400,
-            "message": "Id inexistente",
-            "errors": [
-                {"id": "Id inexistente"}
-            ]
-        }
-    }
-    if(!validate(idCaso)){
-        return {
-            "status": 400,
-            "message": "Id inválido",
-            "errors": [
-                {"id": "Formato de id inválido"}
-            ]
-        }
-    }
-    return null;
-}
+
 
 function errorCasoParametros(corpoCaso){
     let resp = null;
@@ -99,29 +79,6 @@ function errorCasoParametrosParciais(corpoCaso){
     }
 
     return resp;
-}
-
-
-function errorAgenteId(idAgente){
-    if(!idAgente){
-        return {
-            "status": 400,
-            "message": "Id inexistente",
-            "errors": [
-                {"id": "Id inexistente"}
-            ]
-        }
-    }
-    if(!validate(idAgente)){
-        return {
-            "status": 400,
-            "message": "Id inválido",
-            "errors": [
-                {"id": "Formato de id inválido"}
-            ]
-        }
-    }
-    return null;
 }
 
 function isValidDate(s){
@@ -203,10 +160,8 @@ function errorAgenteParametrosParciais(corpoAgente){
 }
 
 module.exports = {
-    errorCasoId,
     errorCasoParametros,
     errorCasoParametrosParciais,
-    errorAgenteId,
     errorAgenteParametros,
     errorAgenteParametrosParciais
 }

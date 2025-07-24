@@ -1,5 +1,29 @@
 const agentesRepository = require("../repositories/agentesRepository");
 const tratadorErro = require("../utils/errorHandler");
+const {validate: validate} = require("uuid");
+
+function errorAgenteId(idAgente){
+    if(!idAgente){
+        return {
+            "status": 400,
+            "message": "Id inexistente",
+            "errors": [
+                {"id": "Id inexistente"}
+            ]
+        }
+    }
+    if(!validate(idAgente)){
+        return {
+            "status": 400,
+            "message": "Id inválido",
+            "errors": [
+                {"id": "Formato de id inválido"}
+            ]
+        }
+    }
+    return null;
+}
+
 function getAllAgentes(req, res) {
     const ordenar = req.query.sort;
     const {id, nome, dataDeIncorporacao, cargo} = req.query;
@@ -19,7 +43,7 @@ function getAllAgentes(req, res) {
 function getAgente(req, res){
     let idAgente = req.params.id;
 
-    let erro = tratadorErro.errorAgenteId(idAgente);
+    let erro = errorAgenteId(idAgente);
 
     if(erro){
         return res.status(erro.status).json(erro)
@@ -64,7 +88,7 @@ function postAgente(req, res){
 function putAgente(req, res){
     let corpoAgente = req.body;
     let idAgente = req.params.id;
-    let erro = tratadorErro.errorAgenteId(idAgente);
+    let erro = errorAgenteId(idAgente);
     if(erro){
         return res.status(erro.status).json(erro);
     }
@@ -99,6 +123,11 @@ function patchAgente(req, res){
     let corpoAgente = req.body;
     let idAgente = req.params.id;
 
+    let erro = errorAgenteId(idAgente);
+    if(erro){
+        return res.status(erro.status).json(erro);
+    }
+
     erro = tratadorErro.errorAgenteParametrosParciais(corpoAgente);
     if(erro){
         return res.status(erro.status).json(erro)
@@ -118,7 +147,7 @@ function patchAgente(req, res){
 
 function deleteAgente(req, res){
     let agenteId = req.params.id;
-    let erro = tratadorErro.errorAgenteId(agenteId);
+    let erro = errorAgenteId(agenteId);
     if(erro){
         return res.status(erro.status).json(erro);
     }
