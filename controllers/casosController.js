@@ -28,10 +28,10 @@ function errorCasoId(idCaso){
 
 function getAllCasos(req, res) {
     const ordenar = req.query.sort;
-    const {id, nome, descricao, status, agente_id} = req.query;
+    const {id, titulo, descricao, status, agente_id} = req.query;
     let filtro = {
         colunaId: id,
-        colunaTitulo: nome,
+        colunaTitulo: titulo,
         colunaDescricao: descricao,
         colunaStatus: status,
         colunaAgenteId: agente_id
