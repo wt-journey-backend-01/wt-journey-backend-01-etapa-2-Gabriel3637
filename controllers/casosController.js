@@ -25,6 +25,21 @@ function errorCasoId(idCaso){
     return null;
 }
 
+function errorAgenteId(corpoCaso){
+    let agenteResponsavel = agentesRepository.findId(corpoCaso.agente_id);
+    if(!agenteResponsavel){
+        return {
+            "status": 404,
+            "message": "Agente não encontrado",
+            "errors": [
+                {"agente_id": "Não existe agente com esse id"}
+            ]
+        }
+    }
+    return null;
+
+}
+
 
 function getAllCasos(req, res) {
     const ordenar = req.query.sort;
@@ -77,15 +92,9 @@ function postCaso(req, res){
     }
     
     if(corpoCaso.agente_id){
-        let agenteResponsavel = agentesRepository.findId(corpoCaso.agente_id);
-        if(!agenteResponsavel){
-            return res.status(404).json({
-                "status": 404,
-                "message": "Agente não encontrado",
-                "errors": [
-                    {"agente_id": "Não existe agente com esse id"}
-                ]
-            })
+        erro = errorAgenteId(corpoCaso);
+        if(erro){
+            return res.status(erro.status).json(erro);
         }
     }
 
@@ -124,15 +133,9 @@ function putCaso(req, res){
     }
 
     if(corpoCaso.agente_id){
-        let agenteResponsavel = agentesRepository.findId(corpoCaso.agente_id);
-        if(!agenteResponsavel){
-            return res.status(404).json({
-                "status": 404,
-                "message": "Agente não encontrado",
-                "errors": [
-                    {"agente_id": "Não existe agente com esse id"}
-                ]
-            })
+        erro = errorAgenteId(corpoCaso);
+        if(erro){
+            return res.status(erro.status).json(erro);
         }
     }
 
@@ -142,15 +145,9 @@ function putCaso(req, res){
     }
 
     if(corpoCaso.agente_id){
-        let agenteResponsavel = agentesRepository.findId(corpoCaso.agente_id);
-        if(!agenteResponsavel){
-            return res.status(404).json({
-                "status": 404,
-                "message": "Agente não encontrado",
-                "errors": [
-                    {"agente_id": "Não existe agente com esse id"}
-                ]
-            })
+        erro = errorAgenteId(corpoCaso);
+        if(erro){
+            return res.status(erro.status).json(erro);
         }
     }
 
@@ -188,15 +185,9 @@ function patchCaso(req, res){
     }
 
     if(corpoCaso.agente_id){
-        let agenteResponsavel = agentesRepository.findId(corpoCaso.agente_id);
-        if(!agenteResponsavel){
-            return res.status(404).json({
-                "status": 404,
-                "message": "Agente não encontrado",
-                "errors": [
-                    {"agente_id": "Não existe agente com esse id"}
-                ]
-            })
+        erro = errorAgenteId(corpoCaso);
+        if(erro){
+            return res.status(erro.status).json(erro);
         }
     }
 
