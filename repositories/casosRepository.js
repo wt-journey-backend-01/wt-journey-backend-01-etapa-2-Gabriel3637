@@ -29,7 +29,24 @@ function findAll(filtro = null, ordenacao = null) {
             casosCopia = casosCopia.filter((item) => item.status.toLowerCase() == filtro.colunaStatus.toLowerCase());
         }
         if(filtro.colunaAgenteId){
-            casosCopia = casosCopia.filter((item) => item.agente_id.toLowerCase() == filtro.colunaAgenteId.toLowerCase());
+            console.log(filtro.colunaAgenteId);
+            if(filtro.colunaAgenteId == "null"){
+                casosCopia = casosCopia.filter((item) => {
+                    if(!item.agente_id){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                })
+            } else {
+                casosCopia = casosCopia.filter((item) => {
+                    if(item.agente_id){
+                        return item.agente_id.toLowerCase() == filtro.colunaAgenteId.toLowerCase();
+                    }else{
+                        return false;
+                    }
+                })
+            }
         }
     }
 
