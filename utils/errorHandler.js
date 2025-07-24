@@ -76,7 +76,6 @@ function errorCasoParametros(corpoCaso){
             resp = erro;
         }
     }
-    console.log("6: ", resp)
     return resp;
 }
 
