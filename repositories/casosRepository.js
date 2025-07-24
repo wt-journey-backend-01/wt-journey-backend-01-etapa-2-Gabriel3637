@@ -17,19 +17,19 @@ function findAll(filtro = null, ordenacao = null) {
 
     if(filtro){
         if(filtro.colunaId){
-            casosCopia = casosCopia.filter((item) => item.id == filtro.colunaId);
+            casosCopia = casosCopia.filter((item) => item.id.toLowerCase() == filtro.colunaId.toLowerCase());
         }
         if(filtro.colunaTitulo){
-            casosCopia = casosCopia.filter((item) => item.titulo == filtro.colunaTitulo);
+            casosCopia = casosCopia.filter((item) => item.titulo.toLowerCase() == filtro.colunaTitulo.toLowerCase());
         }
         if(filtro.colunaDescricao){
-            casosCopia = casosCopia.filter((item) => item.descricao == filtro.colunaDescricao);
+            casosCopia = casosCopia.filter((item) => item.descricao.toLowerCase() == filtro.colunaDescricao.toLowerCase());
         }
         if(filtro.colunaStatus){
-            casosCopia = casosCopia.filter((item) => item.status == filtro.colunaStatus);
+            casosCopia = casosCopia.filter((item) => item.status.toLowerCase() == filtro.colunaStatus.toLowerCase());
         }
         if(filtro.colunaAgenteId){
-            casosCopia = casosCopia.filter((item) => item.agente_id == filtro.colunaAgenteId);
+            casosCopia = casosCopia.filter((item) => item.agente_id.toLowerCase() == filtro.colunaAgenteId.toLowerCase());
         }
     }
 

@@ -12,16 +12,16 @@ function findAll(filtro = null, ordenacao = null) {
     let agentescopia = [...agentes];
     if(filtro){
         if (filtro.colunaId){
-            agentescopia = agentescopia.filter((item) => item.id == filtro.colunaId);
+            agentescopia = agentescopia.filter((item) => item.id.toLowerCase() == filtro.colunaId.toLowerCase());
         }
         if (filtro.colunaNome){
-            agentescopia = agentescopia.filter((item) => item.nome == filtro.colunaNome);
+            agentescopia = agentescopia.filter((item) => item.nome.toLowerCase() == filtro.colunaNome.toLowerCase());
         }
         if (filtro.colunaDataDeIncorporacao){
             agentescopia = agentescopia.filter((item) => item.dataDeIncorporacao == filtro.colunaDataDeIncorporacao);
         }
         if (filtro.colunaCargo){
-            agentescopia = agentescopia.filter((item) => item.cargo == filtro.colunaCargo);
+            agentescopia = agentescopia.filter((item) => item.cargo.toLowerCase() == filtro.colunaCargo.toLowerCase());
         }
     }
     
