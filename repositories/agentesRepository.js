@@ -280,7 +280,7 @@ function findId(id){
 }
 
 function criarAgente(nome, data, cargo){
-    let resp = false;
+    let resp = null;
 
     let agenteadicionar = {
         "id": uuidv4(),
@@ -290,7 +290,7 @@ function criarAgente(nome, data, cargo){
     }
 
     agentes.push(agenteadicionar);
-    resp = true;
+    resp = agenteadicionar;
     
     return resp;
 }

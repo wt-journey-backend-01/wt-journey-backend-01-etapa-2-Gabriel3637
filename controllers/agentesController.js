@@ -76,10 +76,7 @@ function postAgente(req, res){
     
     let validar = agentesRepository.criarAgente(corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
     if(validar){
-        return res.status(201).json({
-            "status": 201,
-            "message": "Agente criado com sucesso"
-        });
+        return res.status(201).json(validar);
     } else {
         return res.status(500).send();
     }

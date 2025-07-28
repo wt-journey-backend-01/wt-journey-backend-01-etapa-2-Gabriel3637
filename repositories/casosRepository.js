@@ -364,7 +364,7 @@ function findId(id){
 }
 
 function criarCaso(titulo, descricao, status, agente_id){
-    let resp = false;
+    let resp = null;
 
     let casoadicionar = {
         "id": uuidv4(),
@@ -375,7 +375,7 @@ function criarCaso(titulo, descricao, status, agente_id){
     }
 
     casos.push(casoadicionar);
-    resp = true;
+    resp = casoadicionar;
     
     return resp;
 }

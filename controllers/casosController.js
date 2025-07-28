@@ -103,10 +103,7 @@ function postCaso(req, res){
     let validar = casosRepository.criarCaso(corpoCaso.titulo, corpoCaso.descricao, corpoCaso.status, corpoCaso.agente_id);
 
     if(validar){
-        return res.status(201).json({
-            "status": 201,
-            "message": "Caso criado com sucesso"
-        });
+        return res.status(201).json(validar);
     }else {
         return res.status(500).send()
     }

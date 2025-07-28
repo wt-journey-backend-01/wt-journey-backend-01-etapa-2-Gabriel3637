@@ -83,10 +83,11 @@ function errorCasoParametrosParciais(corpoCaso){
 
 function isValidDate(s){
 
-    if([4] == '-' && s[7] == '-'){
-        let arrayData = s.split('/');
+    if(s[4] == '-' && s[7] == '-'){
+        let arrayData = s.split('-');
         let dia = parseInt(arrayData[2]);
         let mes = parseInt(arrayData[1]);
+        console.log("teste", dia, mes);
         if((dia >  0 && dia <= 31) && (mes > 0 && mes <= 12)){
             return true;
         }
