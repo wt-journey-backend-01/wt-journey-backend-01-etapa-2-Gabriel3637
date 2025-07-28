@@ -83,7 +83,7 @@ function errorCasoParametrosParciais(corpoCaso){
 
 function isValidDate(s){
 
-    if(s[4] == '/' && s[7] == '/'){
+    if([4] == '-' && s[7] == '-'){
         let arrayData = s.split('/');
         let dia = parseInt(arrayData[2]);
         let mes = parseInt(arrayData[1]);
