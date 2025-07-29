@@ -59,6 +59,7 @@ function errorCasoParametros(corpoCaso){
     return resp;
 }
 
+
 function errorCasoParametrosParciais(corpoCaso){
     let resp = null;
 
