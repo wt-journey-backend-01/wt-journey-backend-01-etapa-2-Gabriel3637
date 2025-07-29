@@ -78,6 +78,14 @@ function errorCasoParametrosParciais(corpoCaso){
         resp = erro
     }
 
+    if(corpoCaso.agente_id && !validate(corpoCaso.agente_id)){
+        arrayErro.push({
+            "agente_id": "Formatação de agente_id inválida"
+        })
+        erro.errors = arrayErro;
+        resp = erro;
+    }
+
     return resp;
 }
 
@@ -87,12 +95,20 @@ function isValidDate(s){
         let arrayData = s.split('-');
         let dia = parseInt(arrayData[2]);
         let mes = parseInt(arrayData[1]);
-        console.log("teste", dia, mes);
         if((dia >  0 && dia <= 31) && (mes > 0 && mes <= 12)){
             return true;
         }
     }
     return false;
+}
+
+function isValidDateFuturo(s){
+    let hoje = new Date();
+    let data = new Date(s);
+    if(data > hoje){
+        return false;
+    }
+    return true;
 }
 
 function errorAgenteParametros(corpoAgente){
@@ -115,13 +131,19 @@ function errorAgenteParametros(corpoAgente){
     if(!corpoAgente.dataDeIncorporacao){
         arrayErro.push({
             "dataDeIncorporacao": "A requisição deve possuir o campo 'dataDeIncorporacao'"
-        })
+        });
         erro.errors = arrayErro;
         resp = erro;
     } else if(!isValidDate(corpoAgente.dataDeIncorporacao)){
         arrayErro.push({
             "dataDeIncorporacao": "Campo dataDeIncorporacao deve seguir a formatação 'YYYY-MM-DD' "
-        })
+        });
+        erro.errors = arrayErro;
+        resp = erro;
+    } else if(!isValidDateFuturo(corpoAgente.dataDeIncorporacao)){
+        arrayErro.push({
+            "dataDeIncorporacao": "Campo dataDeIncorporacao não pode ser uma data futura "
+        });
         erro.errors = arrayErro;
         resp = erro;
     }
@@ -152,6 +174,12 @@ function errorAgenteParametrosParciais(corpoAgente){
     if(corpoAgente.dataDeIncorporacao && !isValidDate(corpoAgente.dataDeIncorporacao)){
         arrayErro.push({
             "dataDeIncorporacao": "Campo dataDeIncorporacao deve seguir a formatação 'YYYY-MM-DD' "
+        })
+        erro.errors = arrayErro;
+        resp = erro;
+    } else if(!isValidDateFuturo(corpoAgente.dataDeIncorporacao)){
+        arrayErro.push({
+            "dataDeIncorporacao": "Campo dataDeIncorporacao não pode ser uma data futura "
         })
         erro.errors = arrayErro;
         resp = erro;

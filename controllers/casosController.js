@@ -129,11 +129,12 @@ function putCaso(req, res){
         });
     }
 
-    if(corpoCaso.agente_id){
-        erro = errorAgenteId(corpoCaso);
-        if(erro){
-            return res.status(erro.status).json(erro);
-        }
+    if (corpoCaso.id) {
+        return res.status(400).json({
+            status: 400,
+            message: "Não é permitido alterar o campo 'id' do caso",
+            errors: [{ "id": "Campo 'id' não pode ser alterado" }]
+        });
     }
 
     erro = tratadorErro.errorCasoParametros(corpoCaso);
@@ -173,6 +174,14 @@ function patchCaso(req, res){
             "errors": [
                 {"id": "Não existe caso com esse id"}
             ]
+        });
+    }
+
+    if (corpoCaso.id) {
+        return res.status(400).json({
+            status: 400,
+            message: "Não é permitido alterar o campo 'id' do caso",
+            errors: [{ "id": "Campo 'id' não pode ser alterado" }]
         });
     }
 

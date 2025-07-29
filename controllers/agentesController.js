@@ -99,6 +99,15 @@ function putAgente(req, res){
             ]
         });
     }
+
+    if (corpoAgente.id) {
+        return res.status(400).json({
+            status: 400,
+            message: "Não é permitido alterar o campo 'id' do agente",
+            errors: [{ "id": "Campo 'id' não pode ser alterado" }]
+        });
+    }
+
     erro = tratadorErro.errorAgenteParametros(corpoAgente);
     if(erro){
         return res.status(erro.status).json(erro);
@@ -123,6 +132,14 @@ function patchAgente(req, res){
     let erro = errorAgenteId(idAgente);
     if(erro){
         return res.status(erro.status).json(erro);
+    }
+
+    if (corpoAgente.id) {
+        return res.status(400).json({
+            status: 400,
+            message: "Não é permitido alterar o campo 'id' do agente",
+            errors: [{ "id": "Campo 'id' não pode ser alterado" }]
+        });
     }
 
     erro = tratadorErro.errorAgenteParametrosParciais(corpoAgente);
