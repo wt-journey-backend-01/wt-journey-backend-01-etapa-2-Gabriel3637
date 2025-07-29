@@ -148,6 +148,18 @@ function patchAgente(req, res){
         return res.status(erro.status).json(erro)
     }
 
+    agenteEncontrado = agentesRepository.findId(idAgente);
+    if(!agenteEncontrado){
+        return res.status(404).json({
+            "status": 404,
+            "message": "Agente não encontrado",
+            "errors": [
+                {"id": "Não existe agente com esse id"}
+            ]
+        });
+    }
+
+
     let validar = agentesRepository.atualizarParcialAgente(idAgente, corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
 
     if(validar){
