@@ -15,7 +15,7 @@ function errorCasoId(idCaso){
     }
     if(!validate(idCaso)){
         return {
-            "status": 400,
+            "status": 404,
             "message": "Id inválido",
             "errors": [
                 {"id": "Formato de id inválido"}
@@ -26,16 +26,22 @@ function errorCasoId(idCaso){
 }
 
 function errorAgenteId(corpoCaso){
-    let agenteResponsavel = agentesRepository.findId(corpoCaso.agente_id);
-    if(!agenteResponsavel){
-        return {
+
+    let erro = {
             "status": 404,
             "message": "Agente não encontrado",
             "errors": [
                 {"agente_id": "Não existe agente com esse id"}
             ]
         }
+    if(corpoCaso.agente_id && !validate(corpoCaso.agente_id)){
+        return erro;
     }
+    let agenteResponsavel = agentesRepository.findId(corpoCaso.agente_id);
+    if(!agenteResponsavel){
+        return erro;
+    }
+
     return null;
 
 }

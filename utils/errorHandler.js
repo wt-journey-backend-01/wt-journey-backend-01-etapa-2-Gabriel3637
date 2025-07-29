@@ -47,14 +47,6 @@ function errorCasoParametros(corpoCaso){
     
     if(!corpoCaso.agente_id){
         corpoCaso.agente_id = null;
-    }else{
-        if(!validate(corpoCaso.agente_id)){
-            arrayErro.push({
-                "agente_id": "Formatação de agente_id inválida"
-            })
-            erro.errors = arrayErro;
-            resp = erro;
-        }
     }
     return resp;
 }
@@ -77,14 +69,6 @@ function errorCasoParametrosParciais(corpoCaso){
         })
         erro.errors = arrayErro;
         resp = erro
-    }
-
-    if(corpoCaso.agente_id && !validate(corpoCaso.agente_id)){
-        arrayErro.push({
-            "agente_id": "Formatação de agente_id inválida"
-        })
-        erro.errors = arrayErro;
-        resp = erro;
     }
 
     return resp;

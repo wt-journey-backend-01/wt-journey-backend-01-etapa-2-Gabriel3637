@@ -14,7 +14,7 @@ function errorAgenteId(idAgente){
     }
     if(!validate(idAgente)){
         return {
-            "status": 400,
+            "status": 404,
             "message": "Id inválido",
             "errors": [
                 {"id": "Formato de id inválido"}
