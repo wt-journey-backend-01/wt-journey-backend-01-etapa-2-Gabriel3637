@@ -315,20 +315,20 @@ function removerAgenteIndex(i){
 }
 
 function atualizarAgente(id, nome, data, cargo){
-    let resp = false;
+    let resp = null;
     let i = agentes.findIndex((item) => item.id == id);
     if(i > -1){
         agentes[i].nome = nome;
         agentes[i].dataDeIncorporacao = data;
         agentes[i].cargo = cargo;
-        resp = true;
+        resp = agentes[i];
     }
 
     return resp;
 }
 
 function atualizarParcialAgente(id, nome = null, data = null, cargo = null){
-    let resp = false;
+    let resp = null;
     let i = agentes.findIndex((item) => item.id == id);
     if(i > -1){
         if(nome){
@@ -340,7 +340,7 @@ function atualizarParcialAgente(id, nome = null, data = null, cargo = null){
         if(cargo){
             agentes[i].cargo = cargo;
         }
-        resp = true;
+        resp = agentes[i];
     }
 
     return resp;

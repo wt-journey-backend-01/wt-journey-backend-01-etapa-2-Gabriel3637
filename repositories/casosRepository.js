@@ -400,21 +400,21 @@ function removerCasoIndex(i){
 }
 
 function atualizarCaso(id, titulo, descricao, status, agente_id){
-    let resp = false;
+    let resp = null;
     let i = casos.findIndex((item) => item.id == id);
     if(i > -1){
         casos[i].titulo = titulo;
         casos[i].descricao = descricao;
         casos[i].status = status;
         casos[i].agente_id = agente_id;
-        resp = true;
+        resp = casos[i];
     }
 
     return resp;
 }
 
 function atualizarParcialCaso(id, titulo = null, descricao = null, status = null, agente_id = undefined){
-    let resp = false;
+    let resp = null;
     let i = casos.findIndex((item) => item.id == id);
     if(i > -1){
         if(titulo){
@@ -429,7 +429,7 @@ function atualizarParcialCaso(id, titulo = null, descricao = null, status = null
         if(agente_id !== undefined){
             casos[i].agente_id = agente_id;
         }
-        resp = true;
+        resp = casos[i];
     }
 
     return resp;

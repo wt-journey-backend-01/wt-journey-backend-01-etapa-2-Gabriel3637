@@ -154,7 +154,8 @@ function putCaso(req, res){
     if(validar){
         return res.status(200).json({
             "status": 200,
-            "message": "Atualização realizada com sucesso"
+            "message": "Atualização realizada com sucesso",
+            ...validar
         });
     } else {
         return res.status(500).send()
@@ -201,7 +202,8 @@ function patchCaso(req, res){
     if(validar){
         return res.status(200).json({
             "status": 200,
-            "message": "Atualização parcial realizada com sucesso"
+            "message": "Atualização parcial realizada com sucesso",
+            ...validar
         })
     } else{
         return res.status(500).send()
