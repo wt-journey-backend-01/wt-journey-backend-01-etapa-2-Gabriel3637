@@ -1,207 +1,102 @@
 const agentesRepository = require("../repositories/agentesRepository");
-const tratadorErro = require("../utils/errorHandler");
-const {validate: validate} = require("uuid");
 
-function errorAgenteId(idAgente){
-    if(!idAgente){
-        return {
-            "status": 400,
-            "message": "Id inexistente",
-            "errors": [
-                {"id": "Id inexistente"}
-            ]
-        }
+function validateRepository(repositoryResponse, statusCode, res){
+    if(repositoryResponse === null){
+        return res.status(404).json({
+            status: 404,
+            message: "Agente inexistente",
+            errors: {
+                id: "Não existe agente com esse id"
+            }
+        })
+    } else if(repositoryResponse === false)
+        return res.status(500).send()
+    else{
+        return res.status(statusCode).json(repositoryResponse);
     }
-    if(!validate(idAgente)){
-        return {
-            "status": 404,
-            "message": "Id inválido",
-            "errors": [
-                {"id": "Formato de id inválido"}
-            ]
-        }
-    }
-    return null;
 }
 
 function getAllAgentes(req, res) {
-    const ordenar = req.query.sort;
-    const {id, nome, dataDeIncorporacao, cargo} = req.query;
-    let filtro = {
-        colunaId: id,
-        colunaNome: nome,
-        colunaDataDeIncorporacao: dataDeIncorporacao,
-        colunaCargo: cargo
+    let ordenar = req.query.sort;
+    const {id, nome, dataDeIncorporacao, cargo} = req.query
+    const filtro = {}
+    let direcao = null;
+
+    if(id)
+        filtro.id = id;
+    if(nome)
+        filtro.nome = nome;
+    if(dataDeIncorporacao)
+        filtro.dataDeIncorporacao = dataDeIncorporacao;
+    if(cargo)
+        filtro.cargo = cargo;
+    if(ordenar){
+        if(ordenar[0] == '-'){
+            ordenar = ordenar.slice(1);
+            direcao = 'DESC';
+        } else {
+            direcao = 'ASC'
+        }
     }
 
-    const agentes = agentesRepository.findAll(filtro, ordenar);
-    res.json(agentes);
+    const agentes = agentesRepository.read(filtro, ordenar, direcao);
+    return validateRepository(agentes, 200, res)
 }
-
-
 
 function getAgente(req, res){
     let idAgente = req.params.id;
 
-    let erro = errorAgenteId(idAgente);
-
-    if(erro){
-        return res.status(erro.status).json(erro)
-    }
-
     let agenteEncontrado = agentesRepository.findId(idAgente);
 
-    if(!agenteEncontrado){
-        return res.status(404).json({
-            "status": 404,
-            "message": "Agente não encontrado",
-            "errors": [
-                {"id": "Não existe agente com esse id"}
-            ]
-        })
-    }
-
-
-    return res.status(200).json(agenteEncontrado)
-
+    return validateRepository(agenteEncontrado, 200, res)
 }
 
 function postAgente(req, res){
-
     corpoAgente = req.body;
-    let erro = tratadorErro.errorAgenteParametros(corpoAgente);
-    if(erro){
-        return res.status(erro.status).json(erro);
-    }
     
-    let validar = agentesRepository.criarAgente(corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
-    if(validar){
-        return res.status(201).json(validar);
-    } else {
-        return res.status(500).send();
-    }
+    let resultado = agentesRepository.create(corpoAgente);
+
+    return validateRepository(resultado, 201, res);
 }
 
 function putAgente(req, res){
     let corpoAgente = req.body;
     let idAgente = req.params.id;
-    let erro = errorAgenteId(idAgente);
-    if(erro){
-        return res.status(erro.status).json(erro);
-    }
-    agenteEncontrado = agentesRepository.findId(idAgente);
-    if(!agenteEncontrado){
-        return res.status(404).json({
-            "status": 404,
-            "message": "Agente não encontrado",
-            "errors": [
-                {"id": "Não existe agente com esse id"}
-            ]
-        });
-    }
 
-    if (corpoAgente.id) {
-        return res.status(400).json({
-            status: 400,
-            message: "Não é permitido alterar o campo 'id' do agente",
-            errors: [{ "id": "Campo 'id' não pode ser alterado" }]
-        });
-    }
 
-    erro = tratadorErro.errorAgenteParametros(corpoAgente);
-    if(erro){
-        return res.status(erro.status).json(erro);
-    }
+    let resultado = agentesRepository.update(idAgente, corpoAgente);
 
-    let validar = agentesRepository.atualizarAgente(idAgente, corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
-
-    if(validar){
-        return res.status(200).json({
-            "status": 200,
-            "message": "Atualização realizada com sucesso",
-            ...validar
-        });
-    } else {
-        return res.status(500).send()
-    }
+    return validateRepository(resultado, 200, res);
 }
 
 function patchAgente(req, res){
     let corpoAgente = req.body;
     let idAgente = req.params.id;
 
-    let erro = errorAgenteId(idAgente);
-    if(erro){
-        return res.status(erro.status).json(erro);
-    }
+    let resultado = agentesRepository.update(idAgente, corpoAgente);
 
-    if (corpoAgente.id) {
-        return res.status(400).json({
-            status: 400,
-            message: "Não é permitido alterar o campo 'id' do agente",
-            errors: [{ "id": "Campo 'id' não pode ser alterado" }]
-        });
-    }
-
-    erro = tratadorErro.errorAgenteParametrosParciais(corpoAgente);
-    if(erro){
-        return res.status(erro.status).json(erro)
-    }
-
-    agenteEncontrado = agentesRepository.findId(idAgente);
-    if(!agenteEncontrado){
-        return res.status(404).json({
-            "status": 404,
-            "message": "Agente não encontrado",
-            "errors": [
-                {"id": "Não existe agente com esse id"}
-            ]
-        });
-    }
-
-
-    let validar = agentesRepository.atualizarParcialAgente(idAgente, corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
-
-    if(validar){
-        return res.status(200).json({
-            "status": 200,
-            "message": "Atualização parcial realizada com sucesso",
-            ...validar
-        })
-    }else {
-        return res.status(500).send()
-    }
+    validateRepository(resultado, 200, res)
 }
 
 function deleteAgente(req, res){
     let agenteId = req.params.id;
-    let erro = errorAgenteId(agenteId);
-    if(erro){
-        return res.status(erro.status).json(erro);
-    }
-
-    let agenteEncontrado = agentesRepository.findId(agenteId);
-    
-    if(!agenteEncontrado){
-        return res.status(404).json({
-            "status": 404,
-            "message": "Agente não encontrado",
-            "errors": [
-                {"id": "Não existe agente com esse id"}
-            ]
-        })
-    }
 
     
-    let validar = agentesRepository.removerAgenteId(agenteId);
-    if(validar){
-        return res.status(204).send();
-    } else {
+    let resultado = agentesRepository.remove(agenteId);
+    if(resultado === false){
         return res.status(500).send()
+    } else if(resultado === 0) {
+        res.status(404).json({
+            status: 404,
+            message: "Agente inexistente",
+            errors: {
+                id: "Não existe agente com esse id"
+            }
+        });
+    } else {
+        return res.status(204).send();
     }
 }
-
-
 
 module.exports = {
    getAllAgentes,

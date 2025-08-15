@@ -1,181 +1,93 @@
-const casosRepository = require("../repositories/casosRepository");
+const {z} = require("zod");
 
-const {validate} = require("uuid");
+const schemeBaseCaso = z.object({
+    id: z.undefined({
+        error: "Campo 'id' não pode ser alterado"
+    }),
+    titulo: z.string({
+        error: (campo) => campo.input === undefined ?  "A requisição deve possuir o campo 'titulo'" : "A requisição deve possuir o campo 'titulo' válido (string)"
+    }).min(1, "O campo 'titulo' não pode ser vazio"),
+    descricao: z.string({
+        error: (campo) => campo.input === undefined ?  "A requisição deve possuir o campo 'descricao'" : "A requisição deve possuir o campo 'descricao' válido (string)"
+    }).min(1, "O campo 'descricao' não pode ser vazio"),
+    status: z.intersection(z.string({
+        error: (campo) => campo.input === undefined ?  "A requisição deve possuir o campo 'status'" : "A requisição deve possuir o campo 'status' válido (string)"
+    }), z.enum(["aberto", "solucionado"], {error: "O campo 'status' pode ser somente 'aberto' ou 'solucionado'"})),
+    agente_id: z.nullable(z.string({
+        error: (campo) => campo.input === undefined ? "A requisição deve possuir o campo 'agente_id'" : "A requisição deve possuir o campo 'agente_id' válido (string ou null)" 
+    }))
+});
 
-
-
-
-
-function errorCasoParametros(corpoCaso){
-    let resp = null;
-    let erro = {
-        "status": 400,
-        "message": "Parâmetros inválidos",
-        "errors": []
-    }
-    arrayErro = [];
-    
-    if(!corpoCaso.titulo){
-        arrayErro.push({
-            "titulo": "A requisição deve possuir o campo 'titulo'"
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    }
-    
-    if(!corpoCaso.descricao){
-        arrayErro.push({
-            "descricao": "A requisição deve possuir o campo 'descricao'"
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    }
-    
-    if(!corpoCaso.status){
-        arrayErro.push({
-            "status": "A requisição deve possuir o campo 'status'"
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    }else if(corpoCaso.status != "aberto" && corpoCaso.status != "solucionado"){
-        arrayErro.push({
-            "status": "O campo 'status' pode ser somente 'aberto' ou 'solucionado'"
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    }
-    
-    if(!corpoCaso.agente_id){
-        corpoCaso.agente_id = null;
-    }
-    return resp;
-}
-
-
-function errorCasoParametrosParciais(corpoCaso){
-    let resp = null;
-
-    let erro = {
-        "status": 400,
-        "message": "Parâmetros inválidos",
-        "errors": []
-    }
-
-    let arrayErro = [];
-
-    if(corpoCaso.status && (corpoCaso.status != "aberto" && corpoCaso.status != "solucionado")){
-        arrayErro.push({
-            "status": "O campo 'status' pode ser somente 'aberto' ou 'solucionado'"
-        })
-        erro.errors = arrayErro;
-        resp = erro
-    }
-
-    return resp;
-}
-
-function isValidDate(s){
-
-    if(s[4] == '-' && s[7] == '-'){
-        let arrayData = s.split('-');
-        let dia = parseInt(arrayData[2]);
-        let mes = parseInt(arrayData[1]);
-        if((dia >  0 && dia <= 31) && (mes > 0 && mes <= 12)){
-            return true;
+const schemeBaseAgente = z.object({
+    id: z.undefined({
+        error: "Campo 'id' não pode ser alterado"
+    }),
+    nome: z.string({
+        error: (campo) => campo.input === undefined ? "A requisição deve possuir o campo 'nome'" : "A requisição deve possuir o campo 'nome' válido (string)"
+    }).min(1, "O campo 'nome' não pode ser vazio"),
+    dataDeIncorporacao: z.intersection(z.string({
+        error: (campo) => campo.input === undefined ? "A requisição deve possuir o campo 'dataDeIncorporacao'" : "A requisição deve possuir o campo 'dataDeIncorporacao' válido (string)"
+    }).regex(/^\d{4}-\d{2}-\d{2}$/, {
+        error: "Campo dataDeIncorporacao deve seguir a formatação 'YYYY-MM-DD' "
+    }), z.refine(
+        (campo) =>{
+            let objData = new Date();
+            return (!isNaN(objData.getDate()) && objData >= new Date(campo))
+        }, {
+            error: "Campo dataDeIncorporacao não pode ser uma data futura"
         }
+    )),
+    cargo: z.string({
+        error: (campo) => campo.input === undefined ? "A requisição deve possuir o campo 'cargo'" : "A requisição deve possuir o campo 'cargo' válido (string)"
+    }).min(1, "O campo 'cargo' não pode ser vazio")
+})
+
+const schemeBaseId = z.intersection(z.string({error: "O id deve ser de um tipo válido (string)"}), z.uuidv4({error: "O id deve possuir formato valido (uuid)"}));
+
+function validarScheme(scheme, itemValidar){
+    let resultado = scheme.safeParse(itemValidar);
+    if(!resultado.success){
+        return {
+            success: resultado.success,
+            errors: resultado.error.issues.map((item) => {
+                return{
+                    path: item.path,
+                    message: item.message
+                }
+            })
+        }
+    }else{
+        return resultado
     }
-    return false;
 }
 
-function isValidDateFuturo(s){
-    let hoje = new Date();
-    let data = new Date(s);
-    if(data > hoje){
-        return false;
+async function validarSchemeAsync(scheme, itemValidar){
+    let resultado = await scheme.safeParseAsync(itemValidar);
+    if(!resultado.success){
+        return {
+            success: resultado.success,
+            errors: resultado.error.issues.map((item) => {
+                return{
+                    path: item.path,
+                    message: item.message
+                }
+            })
+        }
+    }else{
+        resultado= {
+            success: resultado.success,
+            ...resultado.data
+        }
+        return resultado
     }
-    return true;
 }
 
-function errorAgenteParametros(corpoAgente){
-    let resp = null;
-    let erro = {
-        "status": 400,
-        "message": "Parâmetros inválidos",
-        "errors": []
-    }
-    arrayErro = [];
-    
-    if(!corpoAgente.nome){
-        arrayErro.push({
-            "nome": "A requisição deve possuir o campo 'nome'"
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    }
-    
-    if(!corpoAgente.dataDeIncorporacao){
-        arrayErro.push({
-            "dataDeIncorporacao": "A requisição deve possuir o campo 'dataDeIncorporacao'"
-        });
-        erro.errors = arrayErro;
-        resp = erro;
-    } else if(!isValidDate(corpoAgente.dataDeIncorporacao)){
-        arrayErro.push({
-            "dataDeIncorporacao": "Campo dataDeIncorporacao deve seguir a formatação 'YYYY-MM-DD' "
-        });
-        erro.errors = arrayErro;
-        resp = erro;
-    } else if(!isValidDateFuturo(corpoAgente.dataDeIncorporacao)){
-        arrayErro.push({
-            "dataDeIncorporacao": "Campo dataDeIncorporacao não pode ser uma data futura "
-        });
-        erro.errors = arrayErro;
-        resp = erro;
-    }
 
-
-    if(!corpoAgente.cargo){
-        arrayErro.push({
-            "cargo": "A requisição deve possuir o campo 'cargo'"
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    }
-
-    return resp;
-}
-
-function errorAgenteParametrosParciais(corpoAgente){
-    let resp = null;
-
-    let erro = {
-        "status": 400,
-        "message": "Parâmetros inválidos",
-        "errors": []
-    }
-
-    let arrayErro = [];
-
-    if(corpoAgente.dataDeIncorporacao && !isValidDate(corpoAgente.dataDeIncorporacao)){
-        arrayErro.push({
-            "dataDeIncorporacao": "Campo dataDeIncorporacao deve seguir a formatação 'YYYY-MM-DD' "
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    } else if(!isValidDateFuturo(corpoAgente.dataDeIncorporacao)){
-        arrayErro.push({
-            "dataDeIncorporacao": "Campo dataDeIncorporacao não pode ser uma data futura "
-        })
-        erro.errors = arrayErro;
-        resp = erro;
-    }
-
-    return resp;
-}
 
 module.exports = {
-    errorCasoParametros,
-    errorCasoParametrosParciais,
-    errorAgenteParametros,
-    errorAgenteParametrosParciais
+    schemeBaseAgente,
+    schemeBaseCaso,
+    validarScheme,
+    validarSchemeAsync,
+    schemeBaseId,
 }

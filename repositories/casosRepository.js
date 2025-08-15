@@ -1,6 +1,4 @@
-const {v4: uuidv4, validate} = require('uuid');
-const agentesRepository = require('./agentesRepository');
-
+const {v4: uuidv4} = require('uuid');
 
 const casos = [
   {
@@ -49,7 +47,7 @@ const casos = [
     id: 'ddb8216f-f192-4d99-86f5-426da32a205a',
     titulo: 'sequestro',
     descricao: 'Sequestro relatado na rodovia estadual às 21:00 do dia 25/06/2019.',
-    status: 'em andamento',
+    status: 'aberto',
     agente_id: '0a2df2ca-d8a0-4aa3-a107-910d61711707'
   },
   {
@@ -84,7 +82,7 @@ const casos = [
     id: 'e715df56-ed77-41fb-9974-f30c92d6e996',
     titulo: 'sequestro',
     descricao: 'Sequestro de veículo na estrada rural às 18:40 do dia 07/12/2022.',
-    status: 'em andamento',
+    status: 'aberto',
     agente_id: '24ba6b19-6a6b-4f9e-90ab-445b169952b7'
   },
   {
@@ -119,7 +117,7 @@ const casos = [
     id: 'b99c825f-2553-4dca-80a2-efd5b2eb84bf',
     titulo: 'sequestro',
     descricao: 'Sequestro relâmpago no bairro Central às 22:00 do dia 12/07/2015.',
-    status: 'em andamento',
+    status: 'aberto',
     agente_id: 'e462dfbd-9142-454b-a834-80cd3168b759'
   },
   {
@@ -145,314 +143,185 @@ const casos = [
   }
 ]
 
-function findAll(filtro = null, ordenacao = null) {
+function read(filtro = null, ordenacao = null, direcao = null) {
+  try{
     let casosCopia = [...casos];
 
     if(filtro){
-        if(filtro.colunaId){
-            casosCopia = casosCopia.filter((item) => item.id.toLowerCase() == filtro.colunaId.toLowerCase());
-        }
-        if(filtro.colunaTitulo){
-            casosCopia = casosCopia.filter((item) => item.titulo.toLowerCase() == filtro.colunaTitulo.toLowerCase());
-        }
-        if(filtro.colunaDescricao){
-            casosCopia = casosCopia.filter((item) => item.descricao.toLowerCase() == filtro.colunaDescricao.toLowerCase());
-        }
-        if(filtro.colunaStatus){
-            casosCopia = casosCopia.filter((item) => item.status.toLowerCase() == filtro.colunaStatus.toLowerCase());
-        }
-        if(filtro.colunaAgenteId){
-            console.log(filtro.colunaAgenteId);
-            if(filtro.colunaAgenteId == "null"){
+        if(filtro.id)
+            casosCopia = casosCopia.filter((item) => item.id.toLowerCase() == filtro.id.toLowerCase());
+        if(filtro.titulo)
+            casosCopia = casosCopia.filter((item) => item.titulo.toLowerCase() == filtro.titulo.toLowerCase());
+        if(filtro.descricao)
+            casosCopia = casosCopia.filter((item) => item.descricao.toLowerCase() == filtro.descricao.toLowerCase());
+        if(filtro.status)
+            casosCopia = casosCopia.filter((item) => item.status.toLowerCase() == filtro.status.toLowerCase());
+        if(filtro.agente_id){
+            console.log(filtro.agente_id);
+            if(filtro.agente_id == "null"){
                 casosCopia = casosCopia.filter((item) => {
-                    if(!item.agente_id){
+                    if(!item.agente_id)
                         return true;
-                    }else{
+                    else
                         return false;
-                    }
                 })
             } else {
                 casosCopia = casosCopia.filter((item) => {
-                    if(item.agente_id){
-                        return item.agente_id.toLowerCase() == filtro.colunaAgenteId.toLowerCase();
-                    }else{
+                    if(item.agente_id)
+                        return item.agente_id.toLowerCase() == filtro.agente_id.toLowerCase();
+                    else
                         return false;
-                    }
                 })
             }
         }
     }
-
 
     if(ordenacao){
         if(ordenacao[0] == '-'){
             ordenacao = ordenacao.slice(1);
             switch(ordenacao){
                 case "id":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.id.toLowerCase();
-                        let colunaB = b.id.toLowerCase();
-                        if(colunaA < colunaB){
-                            return 1
-                        }
-                        if(colunaA > colunaB){
-                            return -1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => b.id.localeCompare(a.id, 'pt-BR', { sensitivity: 'base' }));
                     break;
                 case "titulo":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.titulo.toLowerCase();
-                        let colunaB = b.titulo.toLowerCase();
-                        if(colunaA < colunaB){
-                            return 1
-                        }
-                        if(colunaA > colunaB){
-                            return -1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => b.titulo.localeCompare(a.titulo, 'pt-BR', { sensitivity: 'base' }));
                     break;
                 case "descricao":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.descricao.toLowerCase();
-                        let colunaB = b.descricao.toLowerCase();
-                        if(colunaA < colunaB){
-                            return 1
-                        }
-                        if(colunaA > colunaB){
-                            return -1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => b.descricao.localeCompare(a.descricao, 'pt-BR', { sensitivity: 'base' }));
                     break;
                 case "status":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.status.toLowerCase();
-                        let colunaB = b.status.toLowerCase();
-                        if(colunaA < colunaB){
-                            return 1
-                        }
-                        if(colunaA > colunaB){
-                            return -1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => b.status.localeCompare(a.status, 'pt-BR', { sensitivity: 'base' }));
                     break;
                 case "agente_id":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.agente_id.toLowerCase();
-                        let colunaB = b.agente_id.toLowerCase();
-                        if(colunaA < colunaB){
-                            return 1
-                        }
-                        if(colunaA > colunaB){
-                            return -1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => b.agente_id.localeCompare(a.agente_id, 'pt-BR', { sensitivity: 'base' }));
                     break;
             }
         }else{
             switch(ordenacao){
                 case "id":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.id.toLowerCase();
-                        let colunaB = b.id.toLowerCase();
-                        if(colunaA < colunaB){
-                            return -1
-                        }
-                        if(colunaA > colunaB){
-                            return 1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => a.id.localeCompare(b.id, 'pt-BR', { sensitivity: 'base' }));
                     break;
                 case "titulo":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.titulo.toLowerCase();
-                        let colunaB = b.titulo.toLowerCase();
-                        if(colunaA < colunaB){
-                            return -1
-                        }
-                        if(colunaA > colunaB){
-                            return 1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR', { sensitivity: 'base' }));
                     break;
                 case "descricao":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.descricao.toLowerCase();
-                        let colunaB = b.descricao.toLowerCase();
-                        if(colunaA < colunaB){
-                            return -1
-                        }
-                        if(colunaA > colunaB){
-                            return 1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => a.descricao.localeCompare(b.descricao, 'pt-BR', { sensitivity: 'base' }));
                     break;
                 case "status":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.status.toLowerCase();
-                        let colunaB = b.status.toLowerCase();
-                        if(colunaA < colunaB){
-                            return -1
-                        }
-                        if(colunaA > colunaB){
-                            return 1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => a.status.localeCompare(b.status, 'pt-BR', { sensitivity: 'base' }));
                     break;
                 case "agente_id":
-                    casosCopia.sort((a, b) => {
-                        let colunaA = a.agente_id.toLowerCase();
-                        let colunaB = b.agente_id.toLowerCase();
-                        if(colunaA < colunaB){
-                            return -1
-                        }
-                        if(colunaA > colunaB){
-                            return 1
-                        }
-                        if(colunaA == colunaB){
-                            return 0
-                        }
-                    });
+                    casosCopia.sort((a, b) => a.agente_id.localeCompare(b.agente_id, 'pt-BR', { sensitivity: 'base' }));
                     break;
             }
         }
     }
 
     return casosCopia
-}
-
-function findIndex(i){
-    let resp;
-    if(i < casos.length && i >= 0){
-        resp = casos[i];
-    } else {
-        resp = null;
-    }
-    return resp;
+  }catch(err){
+    console.log(err);
+    return false;
+  }
 }
 
 function findId(id){
-    let resp = casos.find((item) => item.id == id);
-    return resp;
-}
-
-function criarCaso(titulo, descricao, status, agente_id){
-    let resp = null;
-
-    let casoadicionar = {
-        "id": uuidv4(),
-        "titulo": titulo,
-        "descricao": descricao,
-        "status": status,
-        "agente_id": agente_id
+    try{
+      let resp;
+      if(resp = casos.find((item) => item.id == id)){
+          return resp;
+      } else {
+          return null;
+      }
+    }catch(err){
+      console.log(err);
+      return false;
     }
-
-    casos.push(casoadicionar);
-    resp = casoadicionar;
-    
-    return resp;
 }
 
-function removerCasoId(id){
-    let resp = false;
-    let i = casos.findIndex((item) => item.id == id);
-    if(i > -1){
-        casos.splice(i, 1);
-        resp = true;
+function create(objCaso){
+    try{
+      let resp = null;
+  
+      let casoadicionar = {
+          "id": uuidv4(),
+          "titulo": objCaso.titulo,
+          "descricao": objCaso.descricao,
+          "status": objCaso.status,
+          "agente_id": objCaso.agente_id
+      }
+  
+      casos.push(casoadicionar);
+      resp = casoadicionar;
+      
+      return resp;
+    }catch(err){
+      console.log(err);
+      return false;
     }
-    return resp;
 }
 
-function removerCasoIndex(i){
-    let resp = false;
-    if(i < casos.length && i < casos.length){
-        casos.splice(i, 1);
-        resp = true;
+function remove(id){
+    try{
+      let resp = 0;
+      let i = casos.findIndex((item) => item.id == id);
+      if(i > -1){
+          casos.splice(i, 1);
+          resp = true;
+      }
+      return resp;
+    }catch(err){
+      console.log(err);
+      return false;
     }
-    return resp;
 }
 
-function atualizarCaso(id, titulo, descricao, status, agente_id){
-    let resp = null;
-    let i = casos.findIndex((item) => item.id == id);
-    if(i > -1){
-        casos[i].titulo = titulo;
-        casos[i].descricao = descricao;
-        casos[i].status = status;
-        casos[i].agente_id = agente_id;
-        resp = casos[i];
-    }
-
-    return resp;
-}
-
-function atualizarParcialCaso(id, titulo = null, descricao = null, status = null, agente_id = undefined){
-    let resp = null;
-    let i = casos.findIndex((item) => item.id == id);
-    if(i > -1){
-        if(titulo){
-            casos[i].titulo = titulo;
+function update(id, objCaso){
+    try{
+      let resp = null;
+      let i = casos.findIndex((item) => item.id == id);
+      if(i > -1){
+          if(objCaso.titulo){
+              casos[i].titulo = objCaso.titulo;
+          }
+          if(objCaso.descricao){
+              casos[i].descricao = objCaso.descricao;
+          }
+          if(objCaso.status){
+              casos[i].status = objCaso.status;
+          }
+          if(objCaso.agente_id !== undefined){
+              casos[i].agente_id = objCaso.agente_id;
+          }
+          resp = casos[i];
         }
-        if(descricao){
-            casos[i].descricao = descricao;
-        }
-        if(status){
-            casos[i].status = status;
-        }
-        if(agente_id !== undefined){
-            casos[i].agente_id = agente_id;
-        }
-        resp = casos[i];
+        return resp;
+    }catch(err){
+      console.log(err);
+      return false;
     }
 
-    return resp;
 }
 
-function pesquisarCasos(pesquisa) {
-    let casosFiltrados = casos.filter(caso => 
-        caso.titulo.toLowerCase().includes(pesquisa.toLowerCase()) || 
-        caso.descricao.toLowerCase().includes(pesquisa.toLowerCase())
-    );
-    return casosFiltrados;
+function search(pesquisa) {
+    try{
+      let casosFiltrados = casos.filter(caso => 
+          caso.titulo.toLowerCase().includes(pesquisa.toLowerCase()) || 
+          caso.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+      );
+      return casosFiltrados;
+    }catch(err){
+      console.log(err);
+      return false;
+    }
 }
 
 
 
 module.exports = {
-    findAll,
-    findIndex,
     findId,
-    criarCaso,
-    removerCasoId,
-    removerCasoIndex,
-    atualizarCaso,
-    atualizarParcialCaso,
-    pesquisarCasos
+    read,
+    create,
+    update,
+    remove,
+    search
 }
