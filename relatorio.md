@@ -1,362 +1,210 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 9 créditos restantes para usar o sistema de feedback AI.
+Você tem 4 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para Gabriel3637:
 
-Nota final: **98.2/100**
+Nota final: **97.7/100**
 
-# Feedback para Gabriel3637 🚨👮‍♂️ - Sua API para o Departamento de Polícia
+# Feedback para Gabriel3637 🚔✨
 
-Olá, Gabriel! Primeiro, parabéns pelo esforço e pela organização do seu projeto! 🎉 Você estruturou bem o código, seguindo a arquitetura modular com rotas, controllers e repositories, o que é fundamental para projetos escaláveis. Seu uso do Express está muito bom, e a forma como você trata os dados em memória está limpa e eficiente. 👏
-
-Também quero destacar que você conseguiu implementar com sucesso vários bônus importantes, como:
-
-- Filtros simples para casos por status e agente.
-- Mensagens de erro customizadas para IDs de agentes inválidos.
-  
-Isso mostra que você foi além do básico e se dedicou bastante! 🚀
+Oi Gabriel! Primeiro, parabéns pelo esforço e pela qualidade do seu código! 🎉 Você entregou uma API bastante completa para o Departamento de Polícia, com endpoints bem organizados, tratamento de erros e até algumas funcionalidades bônus! Isso é incrível para uma primeira versão. Vamos juntos analisar o que está ótimo e onde podemos melhorar para deixar sua API ainda mais robusta e alinhada com as melhores práticas? 🚀
 
 ---
 
-## Análise Detalhada e Pontos de Melhoria 🕵️‍♂️
+## 🎯 Pontos Fortes que Merecem Aplausos
 
-### 1. Estrutura de Diretórios
-
-Sua estrutura está muito próxima da esperada, parabéns! Só reforçando para manter sempre assim para facilitar a manutenção e o entendimento:
-
-```
-.
-├── package.json
-├── server.js
-├── routes/
-│   ├── agentesRoutes.js
-│   └── casosRoutes.js
-├── controllers/
-│   ├── agentesController.js
-│   └── casosController.js
-├── repositories/
-│   ├── agentesRepository.js
-│   └── casosRepository.js
-├── docs/
-│   └── swagger.js
-└── utils/
-    └── errorHandler.js
-```
-
-Você seguiu direitinho essa organização, o que facilita muito o fluxo do seu código!
+- **Organização do Projeto:** Você estruturou muito bem o projeto em pastas `routes`, `controllers`, `repositories` e `utils`, exatamente como esperado. Isso facilita muito a manutenção e evolução do código. 👏
+- **Implementação Completa dos Endpoints:** Todos os métodos HTTP para `/agentes` e `/casos` estão implementados, incluindo GET, POST, PUT, PATCH e DELETE — muito bom! 
+- **Validações e Tratamento de Erros:** Você usou middlewares de validação (`validateFunctions`) e retornou status codes apropriados (400, 404, 201, 204). Isso mostra cuidado com a experiência do usuário da API.
+- **Filtros e Ordenação:** A implementação de filtros e ordenação nos endpoints GET está muito bem feita, tanto para agentes quanto para casos.
+- **Bônus Conquistados:** Você implementou corretamente filtros simples para casos por status e agente, o que já é um diferencial bacana! 🎉
 
 ---
 
-### 2. Sobre o Teste que Falhou: Atualização Parcial de Agente com PATCH e Payload Incorreto
+## 🔍 Onde Podemos Ajustar para Chegar no Topo
 
-Você teve um problema no endpoint de atualização parcial de agente (`PATCH /agentes/:id`) quando o payload está em formato incorreto, retornando status code 400. Vamos entender o que pode estar acontecendo.
+### 1. Falha na Validação do Payload para PATCH em `/agentes`
 
-No seu `agentesController.js`, a função `patchAgente` está assim:
+Você mencionou que o teste que falhou está relacionado a receber status 400 ao tentar atualizar parcialmente um agente com PATCH e payload em formato incorreto. Isso indica que, ao enviar um corpo inválido para o PATCH, sua API não está retornando o erro 400 como esperado.
+
+Ao analisar seu `agentesController.js`, especificamente a função `patchAgente`:
 
 ```js
 function patchAgente(req, res){
     let corpoAgente = req.body;
     let idAgente = req.params.id;
 
-    let erro = errorAgenteId(idAgente);
-    if(erro){
-        return res.status(erro.status).json(erro);
-    }
+    let resultado = agentesRepository.update(idAgente, corpoAgente);
 
-    if (corpoAgente.id) {
-        return res.status(400).json({
-            status: 400,
-            message: "Não é permitido alterar o campo 'id' do agente",
-            errors: [{ "id": "Campo 'id' não pode ser alterado" }]
-        });
-    }
-
-    erro = tratadorErro.errorAgenteParametrosParciais(corpoAgente);
-    if(erro){
-        return res.status(erro.status).json(erro)
-    }
-
-    agenteEncontrado = agentesRepository.findId(idAgente);
-    if(!agenteEncontrado){
-        return res.status(404).json({
-            "status": 404,
-            "message": "Agente não encontrado",
-            "errors": [
-                {"id": "Não existe agente com esse id"}
-            ]
-        });
-    }
-
-
-    let validar = agentesRepository.atualizarParcialAgente(idAgente, corpoAgente.nome, corpoAgente.dataDeIncorporacao, corpoAgente.cargo);
-
-    if(validar){
-        return res.status(200).json({
-            "status": 200,
-            "message": "Atualização parcial realizada com sucesso",
-            ...validar
-        })
-    }else {
-        return res.status(500).send()
-    }
+    validateRepository(resultado, 200, res)
 }
 ```
 
-O ponto crucial aqui está na validação do payload feita pela função `errorAgenteParametrosParciais` do seu `errorHandler.js`. 
+Notei que você **não está retornando o resultado da função `validateRepository`**, ou seja, não está usando `return`. Isso pode causar problemas na resposta da requisição, como múltiplos envios ou até falta de resposta adequada. Além disso, não vi nenhum tratamento explícito para validar o formato do payload aqui, embora você tenha um middleware `validateAgentePartialBody` na rota, mas é importante garantir que o fluxo de erro esteja sendo corretamente interrompido.
 
-**Possível causa raiz:**  
-Se essa função não estiver cobrindo todos os casos de payload inválido (por exemplo, campos com tipos errados, campos extras inesperados ou ausência total de campos para atualizar), o seu endpoint pode não retornar o status 400 corretamente.
+**Sugestão de melhoria:**
 
-**O que fazer?**  
-- Verifique e amplie a validação parcial para garantir que o payload contenha pelo menos um campo válido para atualizar e que os tipos estejam corretos.
-- Garanta que, se o payload estiver vazio ou com dados inválidos, a função retorne um erro apropriado.
-
-Exemplo simplificado de validação parcial robusta:
+- Adicione o `return` antes da chamada `validateRepository` para garantir que a resposta seja enviada corretamente:
 
 ```js
-function errorAgenteParametrosParciais(corpo) {
-    if (!corpo || Object.keys(corpo).length === 0) {
-        return {
-            status: 400,
-            message: "Payload vazio",
-            errors: [{ payload: "É necessário fornecer ao menos um campo para atualização" }]
-        };
-    }
-    // Valide cada campo se existir
-    if (corpo.nome && typeof corpo.nome !== 'string') {
-        return {
-            status: 400,
-            message: "Campo 'nome' inválido",
-            errors: [{ nome: "Deve ser uma string" }]
-        };
-    }
-    // Repita para os demais campos: dataDeIncorporacao, cargo...
-    return null;
+function patchAgente(req, res){
+    let corpoAgente = req.body;
+    let idAgente = req.params.id;
+
+    let resultado = agentesRepository.update(idAgente, corpoAgente);
+
+    return validateRepository(resultado, 200, res);
 }
 ```
 
-Assim, seu endpoint fica mais robusto e garante o retorno correto de erro 400 para payloads mal formatados.
-
-**Recurso recomendado:**  
-Para aprofundar na validação de dados em APIs Node.js/Express, veja este vídeo super didático:  
-https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_
+- Verifique se o middleware `validateAgentePartialBody` está corretamente implementado para disparar erros 400 quando o payload estiver mal formatado. Se não estiver, é importante aprimorá-lo.
 
 ---
 
-### 3. Sobre os Testes Bônus que Não Passaram
+### 2. Mensagens de Erro Customizadas para Argumentos Inválidos
 
-Você teve sucesso em vários bônus, mas alguns ainda não foram completamente atendidos, especialmente:
+Você tem uma boa estrutura para erros 404 e 500, mas percebi que os erros de validação (400) não estão sempre retornando mensagens customizadas conforme esperado. Por exemplo, quando o payload tem campos faltando ou incorretos, a resposta deveria detalhar quais campos estão errados.
 
-- Endpoint para buscar o agente responsável por um caso (`GET /casos/:caso_id/agente`)
-- Filtragem de agentes por data de incorporação com ordenação crescente e decrescente
-- Mensagens de erro customizadas para argumentos inválidos de caso
-- Filtragem de casos por palavras-chave no título e/ou descrição
+No seu arquivo `validateFunctions.js` (que não foi enviado, mas que imagino existir pela referência nas rotas), é importante garantir que ele:
 
-Vamos analisar alguns pontos para te ajudar a destravar essas funcionalidades.
+- Use bibliotecas como `zod` (que você já tem nas dependências) para criar schemas claros.
+- Retorne erros detalhados no formato esperado pelo Swagger e pelo cliente, por exemplo:
 
-#### a) Endpoint `GET /casos/:caso_id/agente`
+```json
+{
+  "status": 400,
+  "message": "Parâmetros inválidos",
+  "errors": {
+    "nome": "A requisição deve possuir o campo 'nome'",
+    "dataDeIncorporacao": "A requisição deve possuir o campo 'dataDeIncorporacao'"
+  }
+}
+```
 
-No seu `casosRoutes.js`:
+Se os erros 400 estiverem apenas retornando uma mensagem genérica ou não retornando um JSON estruturado, isso pode ser a causa das falhas nos testes bônus relacionados a erros customizados.
+
+**Recomendo fortemente revisar e reforçar a validação com `zod` e o tratamento dos erros para que eles sigam este padrão.**
+
+---
+
+### 3. Endpoint de Busca do Agente Responsável pelo Caso (`GET /casos/:caso_id/agente`)
+
+Você implementou o endpoint no arquivo `routes/casosRoutes.js`:
 
 ```js
 routerCaso.get('/:caso_id/agente', casosController.getAgenteCaso);
 ```
 
-E no `casosController.js`:
+E a função `getAgenteCaso` no controller:
 
 ```js
 function getAgenteCaso(req, res){
     let idCaso = req.params.caso_id;
-
-    let erro = errorCasoId(idCaso);
-
-    if(erro){
-        return res.status(erro.status).json(erro);
-    }
-
-    let casoEncontrado = casosRepository.findId(idCaso);
-
-    if(!casoEncontrado){
-        return res.status(404).json({
-            "status": 404,
-            "message": "Caso não encontrado",
-            "errors": [
-                {"id": "Não existe caso com esse id"}
-            ]
-        })
-    }
-
-    let idAgenteResponsavel = casoEncontrado.agente_id;
-    if(!idAgenteResponsavel){
-         return res.status(404).json({
-            status: 404,
-            message: "Caso não possui agente responsável",
-            errors: [{ agente_id: "Caso não possui agente associado" }]
-        });
-    }
-
-    let agenteEncontrado = agentesRepository.findId(casoEncontrado.agente_id);
-
-    if(!agenteEncontrado){
-        return res.status(404).json({
-            "status": 404,
-            "message": "Agente não encontrado",
-            "errors": [
-                {"agente_id": "Não existe agente com esse id"}
-            ]
-        })
-    }
-
-    return res.status(200).json(agenteEncontrado);
+    // validação e busca do caso e agente...
 }
 ```
 
-**Análise:**  
-Seu código está correto e cobre os casos de erro e sucesso. Se esse endpoint não está passando, pode ser por detalhes externos, como:
+Porém, um dos testes bônus falhou para este endpoint.
 
-- Testes esperando um formato específico de resposta ou status.
-- Algum detalhe na rota ou no middleware que bloqueia o acesso.
-
-**Sugestão:**  
-- Confirme que o router de casos está corretamente importado e usado em `server.js` (o que você fez corretamente com `app.use("/casos", casosRouter);`).
-- Teste manualmente esse endpoint com ferramentas como Postman ou Insomnia para garantir que responde como esperado.
-- Verifique se o teste espera algum campo extra ou resposta em formato específico.
-
----
-
-#### b) Filtragem e Ordenação por Data de Incorporação
-
-No `agentesRepository.js`, você já implementou filtragem e ordenação por `dataDeIncorporacao`. O que pode faltar para passar o teste?
-
-- Certifique-se que o endpoint `/agentes` está usando corretamente o parâmetro `sort` para ordenar por `dataDeIncorporacao` em ordem crescente e decrescente.
-- No seu controller:
+Analisando o código, ele parece estar correto, mas percebi um possível problema na validação do ID do caso:
 
 ```js
-function getAllAgentes(req, res) {
-    const ordenar = req.query.sort;
-    const {id, nome, dataDeIncorporacao, cargo} = req.query;
-    let filtro = {
-        colunaId: id,
-        colunaNome: nome,
-        colunaDataDeIncorporacao: dataDeIncorporacao,
-        colunaCargo: cargo
-    }
-
-    const agentes = agentesRepository.findAll(filtro, ordenar);
-    res.json(agentes);
+if(idCaso && !validate(idCaso)){
+    return res.status(404).json(erro)
 }
 ```
 
-Isso está ok. Então, talvez o problema seja:
+Aqui, você retorna 404 para IDs inválidos, o que é correto. Porém, o objeto `erro` tem a chave `id` em `errors`, mas na resposta JSON você usa `query` em outro lugar. A consistência na estrutura do erro é importante.
 
-- O formato do parâmetro `sort` passado na query string: o teste pode esperar `sort=dataDeIncorporacao` para ascendente e `sort=-dataDeIncorporacao` para descendente.
-- Seu código no `findAll` trata isso corretamente, mas vale revisar se seu front ou cliente está enviando corretamente.
+Além disso, caso o agente responsável não exista (por exemplo, `agente_id` está vazio ou não é encontrado), você retorna:
+
+```js
+return res.status(404).json({
+    status: 404,
+    message: "Agente responsável inexistente",
+    errors: {
+        agente_id: "Caso não possui agente responsável"
+    }
+});
+```
+
+Está ótimo! Mas certifique-se de que o repositório `agentesRepository.findId` está funcionando corretamente e que o ID do agente está sempre preenchido.
 
 ---
 
-#### c) Filtragem de Casos por Palavras-Chave no Título e Descrição
+### 4. Pequeno Ajuste na Função `remove` do `casosRepository.js`
 
-Você implementou a função `pesquisarCasos` no `casosRepository.js` e o endpoint `/casos/search` no router e controller, o que é ótimo!
+No seu repositório de casos, a função `remove` retorna `true` quando um caso é removido, mas no controller você espera um número (0 ou 1):
+
+```js
+// no repositório
+function remove(id){
+    try{
+      let resp = 0;
+      let i = casos.findIndex((item) => item.id == id);
+      if(i > -1){
+          casos.splice(i, 1);
+          resp = true;  // aqui retorna true, mas deveria ser 1 para manter padrão
+      }
+      return resp;
+    }catch(err){
+      console.log(err);
+      return false;
+    }
+}
+```
 
 No controller:
 
 ```js
-function pesquisarCasos(req, res){
-    const pesquisa = req.query.q;
-    if (!pesquisa){
-        return res.status(400).json({
-            "status": 400,
-            "message": "Parâmetro de pesquisa não fornecido",
-            "errors": [
-                {"query": "O parâmetro 'q' é obrigatório para pesquisa"}
-            ]
-        })
-    }
-
-    let resultadoPesquisa = casosRepository.pesquisarCasos(pesquisa)
-
-    res.status(200).json(resultadoPesquisa)
-
+if(resultado === false){
+    return res.status(500).send()
+} else if(resultado === 0) {
+    res.status(404).json({...});
+} else {
+    return res.status(204).send();
 }
 ```
 
-No repository:
-
-```js
-function pesquisarCasos(pesquisa) {
-    let casosFiltrados = casos.filter(caso => 
-        caso.titulo.toLowerCase().includes(pesquisa.toLowerCase()) || 
-        caso.descricao.toLowerCase().includes(pesquisa.toLowerCase())
-    );
-    return casosFiltrados;
-}
-```
-
-**Análise:**  
-Está correto e funcional. Se o teste não passa, pode ser por:
-
-- O teste esperando algum formato específico na resposta (ex: status code, estrutura do JSON).
-- Algum detalhe no path da rota (ex: `/casos/search` deve estar exatamente assim).
-- Possível conflito de rotas: o seu `GET /casos/:id` pode conflitar com `GET /casos/search` se a ordem das rotas não for adequada. No Express, rotas mais específicas devem vir antes das dinâmicas.
-
-**Sugestão:**  
-No arquivo `casosRoutes.js`, garanta que a rota `/search` esteja antes da rota dinâmica `/:id`:
-
-```js
-routerCaso.get('/search', casosController.pesquisarCasos);
-routerCaso.get('/:id', casosController.getCaso);
-```
-
-Isso evita que `/search` seja interpretado como `id = "search"`.
+Para manter a coerência, sugiro que o `remove` retorne `1` quando remover com sucesso, assim como no `agentesRepository`, para evitar confusão.
 
 ---
 
-### 4. Mensagens de Erro Customizadas para Casos Inválidos
+## 📚 Recursos para Aprofundar e Corrigir
 
-Você implementou mensagens customizadas para erros de agentes, mas para casos, parece que algumas mensagens ainda não estão personalizadas.
-
-No seu `casosController.js`, para validação de ID de caso, você usa a função `errorCasoId(idCaso)`, que retorna mensagens customizadas, o que é ótimo.
-
-Mas para validação de parâmetros do corpo (`errorCasoParametros` e `errorCasoParametrosParciais` no `errorHandler.js`), é importante garantir que eles retornem erros detalhados e personalizados, como você fez para agentes.
-
-**Sugestão:**  
-- Reveja o arquivo `errorHandler.js` para garantir que as funções de validação de casos retornem mensagens claras e específicas.
-- Isso ajuda a API a ser mais amigável e facilita o uso para quem consome.
-
----
-
-## Resumo Rápido para Você Focar 📝
-
-- **Validação Parcial no PATCH /agentes:** Garanta que o payload parcial seja validado para pelo menos um campo válido e tipos corretos, para retornar 400 quando necessário.
-- **Ordem das Rotas em `/casos`:** Coloque `/search` antes de `/:id` para evitar conflitos.
-- **Teste manual do endpoint `/casos/:caso_id/agente`:** Verifique se está funcionando e retornando o esperado.
-- **Mensagens de erro customizadas para casos:** Amplie e melhore as validações no `errorHandler.js` para casos.
-- **Confirme o uso correto do parâmetro `sort` para ordenação por datas em `/agentes`.**
-
----
-
-## Para Continuar Aprendendo e Aprimorando 🚀
-
-- **Validação de dados em APIs Node.js/Express:**  
+- Para garantir validação robusta e mensagens de erro customizadas, recomendo fortemente este vídeo sobre validação em APIs Node.js com Express e Zod:  
   https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_
 
-- **Roteamento no Express.js (com foco em ordem de rotas):**  
+- Para entender melhor o funcionamento dos middlewares de rota e como garantir que erros sejam capturados e retornados corretamente, veja a documentação oficial do Express sobre roteamento:  
   https://expressjs.com/pt-br/guide/routing.html
 
-- **Arquitetura MVC para Node.js/Express:**  
-  https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH
+- Para reforçar o entendimento sobre códigos HTTP e quando usar cada um, veja:  
+  https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400  
+  https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/404
 
-- **Manipulação de arrays e filtros em JS:**  
+- Se quiser revisar como manipular arrays para filtros e ordenação de forma eficiente, este vídeo é excelente:  
   https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI
 
 ---
 
-Gabriel, seu projeto está muito bem encaminhado, e essas pequenas melhorias vão elevar ainda mais a qualidade da sua API! Continue explorando, testando e aprimorando. Estou torcendo pelo seu sucesso! 💪✨
+## 📝 Resumo dos Principais Pontos para Focar
 
-Se precisar de ajuda para entender algum ponto específico, é só chamar! 😉
+- ⚠️ **PATCH `/agentes` não retorna 400 para payload inválido:** ajuste o retorno na controller e garanta validação no middleware.
+- ⚠️ **Mensagens de erro 400 customizadas:** implemente erros detalhados e estruturados para validação de campos, usando `zod` ou similar.
+- ⚠️ **Consistência no retorno da função `remove` em `casosRepository`:** retorne `1` para sucesso, para alinhar com o padrão usado em agentes.
+- ⚠️ **Revisar endpoint `/casos/:caso_id/agente` para garantir que erros e retornos estejam consistentes e claros.**
+- 👍 Continue explorando os filtros e ordenações — você já está no caminho certo!
 
-Abraço do seu Code Buddy! 🤖❤️
+---
+
+Gabriel, seu projeto está muito bem encaminhado e você já domina conceitos importantes de APIs RESTful com Node.js e Express! 👏 Continue aprimorando a validação e tratamento de erros para deixar sua API ainda mais profissional. Se precisar, volte aos recursos que indiquei para fortalecer esses pontos.
+
+Seus esforços são visíveis e tenho certeza que com esses ajustes você vai alcançar a excelência! 💪🚀
+
+Conte comigo para o que precisar, vamos juntos nessa jornada! 😉
+
+Abraços e bons códigos! 👮‍♂️💻✨
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
