@@ -40,7 +40,7 @@ const schemeBaseAgente = z.object({
     cargo: z.string({
         error: (campo) => campo.input === undefined ? "A requisição deve possuir o campo 'cargo'" : "A requisição deve possuir o campo 'cargo' válido (string)"
     }).min(1, "O campo 'cargo' não pode ser vazio")
-})
+}, {error: "Atributo desconhecido"})
 
 const schemeBaseId = z.intersection(z.string({error: "O id deve ser de um tipo válido (string)"}), z.uuidv4({error: "O id deve possuir formato valido (uuid)"}));
 
